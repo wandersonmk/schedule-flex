@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -87,6 +88,9 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Profissional</DialogTitle>
+          <DialogDescription>
+            Preencha os dados do novo profissional e defina sua disponibilidade semanal.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
