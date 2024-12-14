@@ -45,8 +45,18 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
       return;
     }
 
+    if (password.length < 6) {
+      toast({
+        title: "Erro!",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { error: signUpError, data } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -57,36 +67,34 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         },
       });
 
-      if (signUpError) {
-        if (signUpError.message === "User already registered") {
+      if (error) {
+        console.error("Erro ao criar conta:", error);
+        
+        if (error.message === "User already registered") {
           setShowUserExistsDialog(true);
           return;
         }
-        throw signUpError;
+
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Verificar se a organização foi criada
-      const { data: orgMember, error: orgError } = await supabase
-        .from('membros_organizacao')
-        .select('organization_id, role')
-        .eq('user_id', data.user?.id)
-        .single();
-
-      if (orgError) {
-        console.error("Erro ao verificar organização:", orgError);
-        throw new Error("Erro ao criar organização");
+      if (data?.user) {
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Verifique seu email para confirmar sua conta.",
+        });
+        setIsLogin(true);
       }
-
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Você será redirecionado para o painel.",
-      });
-      
     } catch (error: any) {
       console.error("Erro detalhado:", error);
       toast({
         title: "Erro ao criar conta",
-        description: error.message,
+        description: "Ocorreu um erro inesperado. Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -130,6 +138,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              minLength={6}
             />
             <button
               type="button"
@@ -152,6 +161,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isLoading}
+              minLength={6}
             />
             <button
               type="button"
