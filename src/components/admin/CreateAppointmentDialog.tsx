@@ -6,9 +6,25 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+
+// Lista de profissionais (pode ser movida para um arquivo separado posteriormente)
+const professionals = [
+  "Dr. Silva",
+  "Dra. Costa",
+  "Dr. Santos",
+  "Dra. Oliveira",
+  "Dr. Lima",
+];
 
 interface CreateAppointmentDialogProps {
   open: boolean;
@@ -57,12 +73,22 @@ export const CreateAppointmentDialog = ({
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="professional">Profissional</Label>
-              <Input
-                id="professional"
+              <Select
                 value={professional}
-                onChange={(e) => setProfessional(e.target.value)}
+                onValueChange={setProfessional}
                 required
-              />
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione um profissional" />
+                </SelectTrigger>
+                <SelectContent>
+                  {professionals.map((prof) => (
+                    <SelectItem key={prof} value={prof}>
+                      {prof}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="client">Cliente</Label>
