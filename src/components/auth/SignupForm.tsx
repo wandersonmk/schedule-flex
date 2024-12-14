@@ -46,14 +46,24 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message === "User already registered") {
+          toast({
+            title: "Email já cadastrado",
+            description: "Este email já está sendo usado. Por favor, faça login ou use outro email.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Conta criada com sucesso!",
         description: "Você pode fazer login agora.",
       });
       
-      navigate("/admin");
+      setIsLogin(true); // Redirect to login instead of admin since the user needs to verify email
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
