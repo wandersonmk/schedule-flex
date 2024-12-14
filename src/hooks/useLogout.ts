@@ -24,7 +24,8 @@ export const useLogout = () => {
         description: "Você foi desconectado com sucesso.",
       });
       
-      navigate('/');
+      // Redirect to login page
+      navigate('/login');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
       // If we get here, something really went wrong
@@ -34,7 +35,7 @@ export const useLogout = () => {
         description: "Ocorreu um erro ao tentar desconectar. Tente novamente.",
       });
       // Still redirect to login page for safety
-      navigate('/');
+      navigate('/login');
     }
   };
 
