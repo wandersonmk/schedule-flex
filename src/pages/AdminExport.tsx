@@ -1,10 +1,11 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { FileDown, FileSpreadsheet } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useToast } from "@/components/ui/use-toast";
+import * as XLSX from 'xlsx';
 
 const mockData = [
   {
@@ -79,6 +80,23 @@ const AdminExport = () => {
     });
   };
 
+  const exportToXLS = () => {
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(mockData);
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Agendamentos");
+
+    // Save the file
+    XLSX.writeFile(wb, "agendamentos.xlsx");
+
+    toast({
+      title: "Exportação concluída",
+      description: "O arquivo XLS foi gerado com sucesso.",
+    });
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -102,6 +120,14 @@ const AdminExport = () => {
                 >
                   <FileDown className="h-4 w-4" />
                   Exportar como PDF
+                </Button>
+                <Button
+                  onClick={exportToXLS}
+                  variant="secondary"
+                  className="flex items-center gap-2"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Exportar como XLS
                 </Button>
               </div>
             </div>
