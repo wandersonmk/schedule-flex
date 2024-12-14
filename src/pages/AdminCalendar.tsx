@@ -2,6 +2,8 @@ import { FilterSection } from "@/components/admin/FilterSection";
 import { AppointmentsTable } from "@/components/admin/AppointmentsTable";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 
 const mockAppointments = [
   {
@@ -36,7 +38,6 @@ const AdminCalendar = () => {
   const [endDate, setEndDate] = useState<Date>();
   const [searchTerm, setSearchTerm] = useState("");
   const [professionalFilter, setProfessionalFilter] = useState("");
-  const [appointments, setAppointments] = useState(mockAppointments);
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -59,7 +60,7 @@ const AdminCalendar = () => {
     });
   };
 
-  const filteredAppointments = appointments.filter((appointment) => {
+  const filteredAppointments = mockAppointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.date);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProfessional = appointment.professional
@@ -77,27 +78,34 @@ const AdminCalendar = () => {
   });
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Agendamentos</h1>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AdminSidebar />
+        <main className="flex-1 p-4 md:p-8 bg-gray-50 w-full overflow-x-hidden">
+          <div className="space-y-6">
+            <h1 className="text-2xl font-bold text-gray-900">Agendamentos</h1>
 
-      <FilterSection
-        startDate={startDate}
-        endDate={endDate}
-        searchTerm={searchTerm}
-        professionalFilter={professionalFilter}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-        onSearchTermChange={setSearchTerm}
-        onProfessionalFilterChange={setProfessionalFilter}
-        onResetFilters={handleResetFilters}
-      />
+            <FilterSection
+              startDate={startDate}
+              endDate={endDate}
+              searchTerm={searchTerm}
+              professionalFilter={professionalFilter}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onSearchTermChange={setSearchTerm}
+              onProfessionalFilterChange={setProfessionalFilter}
+              onResetFilters={handleResetFilters}
+            />
 
-      <AppointmentsTable 
-        appointments={filteredAppointments}
-        onEdit={handleEditAppointment}
-        onDelete={handleDeleteAppointment}
-      />
-    </div>
+            <AppointmentsTable 
+              appointments={filteredAppointments}
+              onEdit={handleEditAppointment}
+              onDelete={handleDeleteAppointment}
+            />
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 };
 
