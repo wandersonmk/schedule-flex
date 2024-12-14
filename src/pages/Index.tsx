@@ -106,10 +106,10 @@ const Index = () => {
       <div className="hidden md:block md:w-1/2 bg-[#9b87f5] bg-opacity-10">
         <div className="h-full flex items-center justify-center p-8">
           <img 
-            src="/lovable-uploads/7ffcef83-575e-412f-a0e1-9e70cb63fd3b.png" 
-            alt="Agzap Logo" 
-            className="max-w-full h-auto object-contain opacity-50"
-            style={{ maxHeight: '70vh' }}
+            src="/lovable-uploads/c8bd5cfb-389e-42cd-bcb8-ce6d6b5cf359.png" 
+            alt="Medical Team" 
+            className="max-w-full h-auto object-cover rounded-lg shadow-lg"
+            style={{ maxHeight: '80vh' }}
           />
         </div>
       </div>
