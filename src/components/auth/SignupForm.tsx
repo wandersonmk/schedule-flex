@@ -83,6 +83,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
       });
       
     } catch (error: any) {
+      console.error("Erro detalhado:", error);
       toast({
         title: "Erro ao criar conta",
         description: error.message,
