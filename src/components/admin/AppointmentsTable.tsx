@@ -22,7 +22,7 @@ interface Appointment {
 
 export interface AppointmentsTableProps {
   appointments: Appointment[];
-  isLoading?: boolean; // Adicionado isLoading como opcional
+  isLoading?: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -72,10 +72,12 @@ export const AppointmentsTable = ({
               <TableCell>
                 {appointment.client.name}
                 {appointment.client.phone && (
-                  <br />
-                  <span className="text-sm text-gray-500">
-                    {appointment.client.phone}
-                  </span>
+                  <>
+                    <br />
+                    <span className="text-sm text-gray-500">
+                      {appointment.client.phone}
+                    </span>
+                  </>
                 )}
               </TableCell>
               <TableCell>{appointment.status}</TableCell>
