@@ -9,6 +9,20 @@ export const useAppointments = () => {
   const { data: appointments, isLoading } = useQuery({
     queryKey: ['appointments'],
     queryFn: async () => {
+      // First get the user's organization
+      const { data: orgMembers, error: orgError } = await supabase
+        .from('membros_organizacao')
+        .select('organization_id')
+        .limit(1);
+
+      if (orgError) throw orgError;
+      if (!orgMembers || orgMembers.length === 0) {
+        throw new Error("No organization found for user");
+      }
+
+      const organizationId = orgMembers[0].organization_id;
+
+      // Then get appointments for that organization
       const { data, error } = await supabase
         .from('agendamentos')
         .select(`
@@ -16,6 +30,7 @@ export const useAppointments = () => {
           professional:profissionais(name, specialty),
           client:clientes(name, email, phone)
         `)
+        .eq('organization_id', organizationId)
         .order('start_time', { ascending: true });
 
       if (error) throw error;
@@ -31,19 +46,23 @@ export const useAppointments = () => {
       end_time: string;
       notes?: string;
     }) => {
-      const { data: orgData, error: orgError } = await supabase
+      // Get organization_id first
+      const { data: orgMembers, error: orgError } = await supabase
         .from('membros_organizacao')
         .select('organization_id')
-        .single();
+        .limit(1);
 
       if (orgError) throw orgError;
+      if (!orgMembers || orgMembers.length === 0) {
+        throw new Error("No organization found for user");
+      }
 
       const { data, error } = await supabase
         .from('agendamentos')
         .insert([
           {
             ...appointmentData,
-            organization_id: orgData.organization_id,
+            organization_id: orgMembers[0].organization_id,
           }
         ])
         .select()
@@ -59,7 +78,7 @@ export const useAppointments = () => {
         description: "O agendamento foi criado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao criar agendamento",
         description: error.message,
@@ -92,7 +111,7 @@ export const useAppointments = () => {
         description: "O agendamento foi atualizado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao atualizar agendamento",
         description: error.message,
@@ -117,7 +136,7 @@ export const useAppointments = () => {
         description: "O agendamento foi excluído com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro ao excluir agendamento",
         description: error.message,
