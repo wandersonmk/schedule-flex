@@ -5,6 +5,7 @@ import { FilterSection } from "./admin/FilterSection";
 import { AppointmentsTable } from "./admin/AppointmentsTable";
 import { DeleteAppointmentDialog } from "./admin/DeleteAppointmentDialog";
 import { EditAppointmentDialog } from "./admin/EditAppointmentDialog";
+import { CreateAppointmentDialog } from "./admin/CreateAppointmentDialog";
 import { useToast } from "@/components/ui/use-toast";
 
 const mockAppointments = [
@@ -43,6 +44,7 @@ export const AdminDashboard = () => {
   const [appointments, setAppointments] = useState(mockAppointments);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<typeof mockAppointments[0] | null>(null);
 
   const handleExportData = () => {
@@ -68,9 +70,25 @@ export const AdminDashboard = () => {
     setProfessionalFilter("");
   };
 
-  const handleCreateAppointment = () => {
-    // TODO: Implement create appointment logic
-    console.log("Create new appointment");
+  const handleCreateAppointment = (newAppointment: {
+    professional: string;
+    client: string;
+    date: string;
+    time: string;
+    status: string;
+  }) => {
+    const newId = `APT${(appointments.length + 1).toString().padStart(3, '0')}`;
+    const appointment = {
+      id: newId,
+      ...newAppointment,
+    };
+    
+    setAppointments([...appointments, appointment]);
+    setCreateDialogOpen(false);
+    toast({
+      title: "Agendamento criado",
+      description: `O agendamento ${newId} foi criado com sucesso.`,
+    });
   };
 
   const handleEditAppointment = (id: string) => {
@@ -135,7 +153,10 @@ export const AdminDashboard = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
         <div className="flex gap-2">
-          <Button onClick={handleCreateAppointment} className="flex items-center gap-2">
+          <Button 
+            onClick={() => setCreateDialogOpen(true)} 
+            className="flex items-center gap-2 bg-primary hover:bg-primary-600 active:bg-primary-700 transform transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
+          >
             <Plus className="h-4 w-4" />
             Novo Agendamento
           </Button>
@@ -175,6 +196,12 @@ export const AdminDashboard = () => {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSave={handleSaveEdit}
+      />
+
+      <CreateAppointmentDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSave={handleCreateAppointment}
       />
     </div>
   );
