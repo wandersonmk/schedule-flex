@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Edit, Trash2, WhatsApp } from "lucide-react";
+import { Edit, Trash2, MessageCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -75,7 +75,7 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
                     className="hover:text-green-500 flex items-center gap-2"
                     onClick={() => openWhatsApp(appointment.whatsapp!)}
                   >
-                    <WhatsApp className="h-4 w-4 text-green-500" />
+                    <MessageCircle className="h-4 w-4 text-green-500" />
                     {appointment.whatsapp}
                   </Button>
                 )}
