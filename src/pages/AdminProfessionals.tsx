@@ -9,12 +9,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+interface TimeSlot {
+  start: string;
+  end: string;
+}
+
+interface DaySchedule {
+  enabled: boolean;
+  timeSlots: TimeSlot;
+}
+
+interface WeeklySchedule {
+  [key: string]: DaySchedule;
+}
+
 interface Professional {
   id: string;
   name: string;
   specialty: string;
   email: string;
   phone: string;
+  availability: WeeklySchedule;
 }
 
 const AdminProfessionals = () => {
@@ -25,6 +40,57 @@ const AdminProfessionals = () => {
       specialty: "Clínico Geral",
       email: "joao.silva@exemplo.com",
       phone: "(11) 99999-9999",
+      availability: {
+        monday: {
+          enabled: true,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        tuesday: {
+          enabled: true,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        wednesday: {
+          enabled: true,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        thursday: {
+          enabled: true,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        friday: {
+          enabled: true,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        saturday: {
+          enabled: false,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+        sunday: {
+          enabled: false,
+          timeSlots: {
+            start: "08:00",
+            end: "18:00",
+          },
+        },
+      },
     },
   ]);
 
@@ -65,7 +131,7 @@ const AdminProfessionals = () => {
     setProfessionals((prev) =>
       prev.map((p) =>
         p.id === selectedProfessional.id
-          ? { ...p, ...formData }
+          ? { ...p, ...formData, availability: selectedProfessional.availability }
           : p
       )
     );
@@ -83,13 +149,11 @@ const AdminProfessionals = () => {
   };
 
   const handleDeleteProfessional = (id: string) => {
-    if (window.confirm("Tem certeza que deseja remover este profissional?")) {
-      setProfessionals((prev) => prev.filter((p) => p.id !== id));
-      toast({
-        title: "Profissional removido",
-        description: "O profissional foi removido com sucesso.",
-      });
-    }
+    setProfessionals((prev) => prev.filter((p) => p.id !== id));
+    toast({
+      title: "Profissional removido",
+      description: "O profissional foi removido com sucesso.",
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
