@@ -7,21 +7,44 @@ import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/admin");
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: orgMember } = await supabase
+            .from('organization_members')
+            .select('organization_id, role')
+            .eq('user_id', session.user.id)
+            .single();
+
+          if (orgMember) {
+            navigate("/admin");
+          }
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        navigate("/admin");
+        const { data: orgMember } = await supabase
+          .from('organization_members')
+          .select('organization_id, role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (orgMember) {
+          navigate("/admin");
+        }
       }
     });
 
@@ -29,6 +52,14 @@ const Index = () => {
       subscription.unsubscribe();
     };
   }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">

@@ -27,11 +27,13 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showUserExistsDialog, setShowUserExistsDialog] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     if (password !== confirmPassword) {
       toast({
@@ -39,11 +41,12 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         description: "As senhas não coincidem.",
         variant: "destructive",
       });
+      setIsLoading(false);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -54,26 +57,27 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         },
       });
 
-      if (error) {
-        if (error.message === "User already registered") {
+      if (signUpError) {
+        if (signUpError.message === "User already registered") {
           setShowUserExistsDialog(true);
           return;
         }
-        throw error;
+        throw signUpError;
       }
 
       toast({
         title: "Conta criada com sucesso!",
-        description: "Você pode fazer login agora.",
+        description: "Você será redirecionado para o painel.",
       });
       
-      setIsLogin(true);
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +91,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
             value={nomeEmpresa}
             onChange={(e) => setNomeEmpresa(e.target.value)}
             required
+            disabled={isLoading}
           />
           <Input
             type="text"
@@ -94,6 +99,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
             value={nomeUsuario}
             onChange={(e) => setNomeUsuario(e.target.value)}
             required
+            disabled={isLoading}
           />
           <Input
             type="email"
@@ -101,6 +107,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={isLoading}
           />
           <div className="relative">
             <Input
@@ -109,11 +116,13 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              disabled={isLoading}
             >
               {showPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -129,11 +138,13 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              disabled={isLoading}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -146,9 +157,10 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
 
         <Button
           type="submit"
-          className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+          className="w-full bg-primary hover:bg-primary-600 text-white"
+          disabled={isLoading}
         >
-          Criar conta
+          {isLoading ? "Criando conta..." : "Criar conta"}
         </Button>
       </form>
 

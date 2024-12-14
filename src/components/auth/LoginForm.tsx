@@ -10,11 +10,13 @@ export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -23,6 +25,19 @@ export const LoginForm = () => {
       });
 
       if (error) throw error;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error("Usuário não encontrado");
+
+      // Fetch user's organization
+      const { data: orgMember, error: orgError } = await supabase
+        .from('organization_members')
+        .select('organization_id, role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (orgError) throw orgError;
 
       toast({
         title: "Login realizado com sucesso!",
@@ -36,6 +51,8 @@ export const LoginForm = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +65,7 @@ export const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={isLoading}
         />
         <div className="relative">
           <Input
@@ -56,11 +74,13 @@ export const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isLoading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            disabled={isLoading}
           >
             {showPassword ? (
               <EyeOff className="h-5 w-5" />
@@ -73,9 +93,10 @@ export const LoginForm = () => {
 
       <Button
         type="submit"
-        className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+        className="w-full bg-primary hover:bg-primary-600 text-white"
+        disabled={isLoading}
       >
-        Acessar
+        {isLoading ? "Entrando..." : "Acessar"}
       </Button>
 
       <div className="text-center">
