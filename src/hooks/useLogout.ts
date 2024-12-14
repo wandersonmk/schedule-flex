@@ -6,9 +6,8 @@ export const useLogout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogout = async () => {
+  const logout = async () => {
     try {
-      // First check if we have a session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
@@ -19,14 +18,13 @@ export const useLogout = () => {
         }
       }
 
-      // Always show success message and redirect to login page
       toast({
-        title: "Logout realizado",
+        title: "Logout realizado com sucesso!",
         description: "Você foi desconectado com sucesso.",
       });
       
       // Redirect to login page
-      navigate('/');
+      navigate('/login');
       
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
@@ -37,9 +35,9 @@ export const useLogout = () => {
         description: "Ocorreu um erro ao tentar desconectar. Tente novamente.",
       });
       // Still redirect to login page for safety
-      navigate('/');
+      navigate('/login');
     }
   };
 
-  return { handleLogout };
+  return { logout };
 };
