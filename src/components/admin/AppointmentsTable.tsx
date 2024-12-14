@@ -19,12 +19,16 @@ import {
 
 interface Appointment {
   id: string;
-  professional: string;
-  client: string;
-  date: string;
-  time: string;
+  professional: {
+    name: string;
+  };
+  client: {
+    name: string;
+    phone?: string;
+  };
+  start_time: string;
+  end_time: string;
   status: string;
-  whatsapp?: string;
 }
 
 interface AppointmentsTableProps {
@@ -71,10 +75,10 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
           {appointments.map((appointment) => (
             <TableRow key={appointment.id}>
               <TableCell>{appointment.id.replace('APT', '')}</TableCell>
-              <TableCell>{appointment.professional}</TableCell>
-              <TableCell>{appointment.client}</TableCell>
+              <TableCell>{appointment.professional.name}</TableCell>
+              <TableCell>{appointment.client.name}</TableCell>
               <TableCell>
-                {appointment.whatsapp && (
+                {appointment.client.phone && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -82,10 +86,10 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
                           variant="ghost"
                           size="sm"
                           className="hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center gap-2"
-                          onClick={() => openWhatsApp(appointment.whatsapp!)}
+                          onClick={() => openWhatsApp(appointment.client.phone!)}
                         >
                           <MessageCircle className="h-4 w-4 text-green-600" />
-                          {appointment.whatsapp}
+                          {appointment.client.phone}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -95,8 +99,8 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
                   </TooltipProvider>
                 )}
               </TableCell>
-              <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
-              <TableCell>{appointment.time}</TableCell>
+              <TableCell>{format(new Date(appointment.start_time), "dd/MM/yyyy")}</TableCell>
+              <TableCell>{format(new Date(appointment.start_time), "HH:mm")}</TableCell>
               <TableCell>
                 <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(appointment.status))}>
                   {appointment.status}

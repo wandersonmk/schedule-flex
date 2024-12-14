@@ -17,27 +17,17 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface TimeSlot {
-  start: string;
-  end: string;
-}
-
-interface DaySchedule {
-  enabled: boolean;
-  timeSlots: TimeSlot;
-}
-
-interface WeeklySchedule {
-  [key: string]: DaySchedule;
-}
-
 interface Professional {
   id: string;
   name: string;
   specialty: string;
   email: string;
   phone: string;
-  availability: WeeklySchedule;
+  availability: {
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+  }[];
 }
 
 interface ProfessionalsTableProps {
@@ -61,22 +51,21 @@ const getPeriodOfDay = (startTime: string, endTime: string): string => {
   }
 };
 
-const formatAvailability = (availability: WeeklySchedule): string => {
+const formatAvailability = (availability: Professional['availability']): string => {
   const days = {
-    monday: "Seg",
-    tuesday: "Ter",
-    wednesday: "Qua",
-    thursday: "Qui",
-    friday: "Sex",
-    saturday: "Sáb",
-    sunday: "Dom",
+    1: "Seg",
+    2: "Ter",
+    3: "Qua",
+    4: "Qui",
+    5: "Sex",
+    6: "Sáb",
+    0: "Dom",
   };
 
-  const availableDays = Object.entries(availability)
-    .filter(([_, schedule]) => schedule.enabled)
-    .map(([day, schedule]) => {
-      const period = getPeriodOfDay(schedule.timeSlots.start, schedule.timeSlots.end);
-      return `${days[day as keyof typeof days]} (${period})`;
+  const availableDays = availability
+    .map((schedule) => {
+      const period = getPeriodOfDay(schedule.start_time, schedule.end_time);
+      return `${days[schedule.day_of_week as keyof typeof days]} (${period})`;
     })
     .join(", ");
 
@@ -131,7 +120,7 @@ export const ProfessionalsTable = ({
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className={`flex items-center gap-2 ${!professional.availability || Object.entries(professional.availability).filter(([_, schedule]) => schedule.enabled).length === 0 ? 'text-red-500' : ''}`}
+                        className={`flex items-center gap-2 ${!professional.availability || professional.availability.length === 0 ? 'text-red-500' : ''}`}
                       >
                         <Clock className="h-4 w-4" />
                         <span className="truncate max-w-[200px]">
