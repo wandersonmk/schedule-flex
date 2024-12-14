@@ -8,22 +8,15 @@ export const useLogout = () => {
 
   const logout = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { error } = await supabase.auth.signOut();
       
-      if (session) {
-        const { error } = await supabase.auth.signOut();
-        // If we get a 403, it means the user is already logged out, which is fine
-        if (error && error.status !== 403) {
-          throw error;
-        }
-      }
-
+      // Show success message regardless of error since we're logging out anyway
       toast({
         title: "Logout realizado com sucesso!",
         description: "Você foi desconectado com sucesso.",
       });
       
-      // Redirect to login page
+      // Always redirect to login page
       navigate('/login');
       
     } catch (error) {
