@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { FilterSection } from "@/components/admin/FilterSection";
 import { AppointmentsTable } from "@/components/admin/AppointmentsTable";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
@@ -42,6 +42,7 @@ const AdminCalendar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [professionalFilter, setProfessionalFilter] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [appointments, setAppointments] = useState(mockAppointments);
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -50,21 +51,30 @@ const AdminCalendar = () => {
     setProfessionalFilter("");
   };
 
-  const handleEditAppointment = (id: string) => {
+  const handleSaveAppointment = (appointment: {
+    professional: string;
+    client: string;
+    date: string;
+    time: string;
+    status: string;
+    whatsapp?: string;
+    sendNotification?: boolean;
+  }) => {
+    const newAppointment = {
+      id: `APT${(appointments.length + 1).toString().padStart(3, '0')}`,
+      ...appointment
+    };
+    
+    setAppointments([...appointments, newAppointment]);
+    setIsCreateDialogOpen(false);
+    
     toast({
-      title: "Editar agendamento",
-      description: `Editando agendamento ${id}`,
+      title: "Agendamento criado",
+      description: `Agendamento para ${appointment.client} criado com sucesso.`,
     });
   };
 
-  const handleDeleteAppointment = (id: string) => {
-    toast({
-      title: "Excluir agendamento",
-      description: `Excluindo agendamento ${id}`,
-    });
-  };
-
-  const filteredAppointments = mockAppointments.filter((appointment) => {
+  const filteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.date);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProfessional = appointment.professional
@@ -112,8 +122,18 @@ const AdminCalendar = () => {
 
             <AppointmentsTable 
               appointments={filteredAppointments}
-              onEdit={handleEditAppointment}
-              onDelete={handleDeleteAppointment}
+              onEdit={(id) => {
+                toast({
+                  title: "Editar agendamento",
+                  description: `Editando agendamento ${id}`,
+                });
+              }}
+              onDelete={(id) => {
+                toast({
+                  title: "Excluir agendamento",
+                  description: `Excluindo agendamento ${id}`,
+                });
+              }}
             />
           </div>
         </main>
@@ -121,6 +141,7 @@ const AdminCalendar = () => {
       <CreateAppointmentDialog 
         open={isCreateDialogOpen} 
         onOpenChange={setIsCreateDialogOpen}
+        onSave={handleSaveAppointment}
       />
     </SidebarProvider>
   );
