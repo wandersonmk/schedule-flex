@@ -5,6 +5,13 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
 import AdminFilters from "./pages/AdminFilters";
+import AdminProfessionals from "./pages/AdminProfessionals";
+import AdminClients from "./pages/AdminClients";
+import AdminNotifications from "./pages/AdminNotifications";
+import AdminReports from "./pages/AdminReports";
+import AdminSettings from "./pages/AdminSettings";
+import AdminFinancial from "./pages/AdminFinancial";
+import AdminExport from "./pages/AdminExport";
 
 const queryClient = new QueryClient();
 
@@ -18,13 +25,13 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
             <Route path="/admin/filters" element={<AdminFilters />} />
-            <Route path="/admin/professionals" element={<Admin />} />
-            <Route path="/admin/clients" element={<Admin />} />
-            <Route path="/admin/notifications" element={<Admin />} />
-            <Route path="/admin/reports" element={<Admin />} />
-            <Route path="/admin/settings" element={<Admin />} />
-            <Route path="/admin/financial" element={<Admin />} />
-            <Route path="/admin/export" element={<Admin />} />
+            <Route path="/admin/professionals" element={<AdminProfessionals />} />
+            <Route path="/admin/clients" element={<AdminClients />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/reports" element={<AdminReports />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/financial" element={<AdminFinancial />} />
+            <Route path="/admin/export" element={<AdminExport />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
