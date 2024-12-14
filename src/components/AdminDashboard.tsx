@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { FilterSection } from "./admin/FilterSection";
 import { AppointmentsTable } from "./admin/AppointmentsTable";
 import { DeleteAppointmentDialog } from "./admin/DeleteAppointmentDialog";
@@ -9,6 +9,7 @@ import { CreateAppointmentDialog } from "./admin/CreateAppointmentDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { DashboardMetrics } from "./admin/dashboard/DashboardMetrics";
 import { AppointmentsChart } from "./admin/dashboard/AppointmentsChart";
+import { ExportButton } from "./admin/ExportButton";
 
 const mockAppointments = [
   {
@@ -48,22 +49,6 @@ export const AdminDashboard = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<typeof mockAppointments[0] | null>(null);
-
-  const handleExportData = () => {
-    const csvContent = "data:text/csv;charset=utf-8," + 
-      "ID,Profissional,Cliente,Data,Horário,Status\n" +
-      filteredAppointments.map(row => 
-        `${row.id},${row.professional},${row.client},${row.date},${row.time},${row.status}`
-      ).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "agendamentos.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -162,10 +147,7 @@ export const AdminDashboard = () => {
             <Plus className="h-4 w-4" />
             Novo Agendamento
           </Button>
-          <Button onClick={handleExportData} variant="outline" className="flex items-center gap-2">
-            <Download className="h-4 w-4" />
-            Exportar Dados
-          </Button>
+          <ExportButton data={filteredAppointments} />
         </div>
       </div>
 
