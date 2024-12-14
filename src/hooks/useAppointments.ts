@@ -17,7 +17,7 @@ export const useAppointments = () => {
 
       if (orgError) throw orgError;
       if (!orgMembers || orgMembers.length === 0) {
-        throw new Error("No organization found for user");
+        throw new Error("Nenhuma organização encontrada para o usuário");
       }
 
       const organizationId = orgMembers[0].organization_id;
@@ -54,7 +54,7 @@ export const useAppointments = () => {
 
       if (orgError) throw orgError;
       if (!orgMembers || orgMembers.length === 0) {
-        throw new Error("No organization found for user");
+        throw new Error("Nenhuma organização encontrada para o usuário");
       }
 
       const { data, error } = await supabase
