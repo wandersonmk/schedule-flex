@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Appointment {
   id: string;
@@ -69,15 +75,24 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
               <TableCell>{appointment.client}</TableCell>
               <TableCell>
                 {appointment.whatsapp && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center gap-2"
-                    onClick={() => openWhatsApp(appointment.whatsapp!)}
-                  >
-                    <MessageCircle className="h-4 w-4 text-green-600" />
-                    {appointment.whatsapp}
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center gap-2"
+                          onClick={() => openWhatsApp(appointment.whatsapp!)}
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                          {appointment.whatsapp}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Chamar no WhatsApp</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </TableCell>
               <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
