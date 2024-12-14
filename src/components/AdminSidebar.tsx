@@ -25,10 +25,13 @@ import {
   FileText,
   DollarSign,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const AdminSidebar = () => {
   const { state } = useSidebar();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const isCollapsed = state === "collapsed";
 
   const menuItems = [
@@ -95,8 +98,13 @@ export const AdminSidebar = () => {
   ];
 
   const handleLogout = () => {
-    // Implement logout logic here
-    console.log("Logout clicked");
+    // Here you would typically clear any auth tokens or user data from storage
+    // For now, we'll just show a toast and redirect to home
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado com sucesso.",
+    });
+    navigate('/');
   };
 
   return (
