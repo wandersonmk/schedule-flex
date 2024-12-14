@@ -45,7 +45,7 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
+            <TableHead>Número</TableHead>
             <TableHead>Profissional</TableHead>
             <TableHead>Cliente</TableHead>
             <TableHead>Data</TableHead>
@@ -57,7 +57,7 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
         <TableBody>
           {appointments.map((appointment) => (
             <TableRow key={appointment.id}>
-              <TableCell>{appointment.id}</TableCell>
+              <TableCell>{appointment.id.replace('APT', '')}</TableCell>
               <TableCell>{appointment.professional}</TableCell>
               <TableCell>{appointment.client}</TableCell>
               <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
