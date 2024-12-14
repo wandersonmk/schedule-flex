@@ -10,17 +10,18 @@ export const useAppointments = () => {
     queryKey: ['appointments'],
     queryFn: async () => {
       // First get the user's organization
-      const { data: orgMembers, error: orgError } = await supabase
+      const { data: orgMember, error: orgError } = await supabase
         .from('membros_organizacao')
         .select('organization_id')
-        .limit(1);
+        .limit(1)
+        .single();
 
-      if (orgError) throw orgError;
-      if (!orgMembers || orgMembers.length === 0) {
-        throw new Error("Nenhuma organização encontrada para o usuário");
+      if (orgError) {
+        if (orgError.code === 'PGRST116') {
+          throw new Error("Nenhuma organização encontrada para o usuário");
+        }
+        throw orgError;
       }
-
-      const organizationId = orgMembers[0].organization_id;
 
       // Then get appointments for that organization
       const { data, error } = await supabase
@@ -30,7 +31,7 @@ export const useAppointments = () => {
           professional:profissionais(name, specialty),
           client:clientes(name, email, phone)
         `)
-        .eq('organization_id', organizationId)
+        .eq('organization_id', orgMember.organization_id)
         .order('start_time', { ascending: true });
 
       if (error) throw error;
@@ -47,14 +48,17 @@ export const useAppointments = () => {
       notes?: string;
     }) => {
       // Get organization_id first
-      const { data: orgMembers, error: orgError } = await supabase
+      const { data: orgMember, error: orgError } = await supabase
         .from('membros_organizacao')
         .select('organization_id')
-        .limit(1);
+        .limit(1)
+        .single();
 
-      if (orgError) throw orgError;
-      if (!orgMembers || orgMembers.length === 0) {
-        throw new Error("Nenhuma organização encontrada para o usuário");
+      if (orgError) {
+        if (orgError.code === 'PGRST116') {
+          throw new Error("Nenhuma organização encontrada para o usuário");
+        }
+        throw orgError;
       }
 
       const { data, error } = await supabase
@@ -62,7 +66,7 @@ export const useAppointments = () => {
         .insert([
           {
             ...appointmentData,
-            organization_id: orgMembers[0].organization_id,
+            organization_id: orgMember.organization_id,
           }
         ])
         .select()
