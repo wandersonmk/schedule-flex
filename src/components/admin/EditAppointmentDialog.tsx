@@ -9,6 +9,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const professionals = [
+  "Dr. Silva",
+  "Dra. Costa",
+  "Dr. Santos",
+  "Dra. Oliveira",
+  "Dr. Lima",
+];
 
 interface Appointment {
   id: string;
@@ -17,6 +33,8 @@ interface Appointment {
   date: string;
   time: string;
   status: string;
+  whatsapp?: string;
+  sendNotification?: boolean;
 }
 
 interface EditAppointmentDialogProps {
@@ -54,6 +72,14 @@ export const EditAppointmentDialog = ({
     setFormData((prev) => prev ? ({ ...prev, [name]: value }) : null);
   };
 
+  const handleProfessionalChange = (value: string) => {
+    setFormData((prev) => prev ? ({ ...prev, professional: value }) : null);
+  };
+
+  const handleNotificationChange = (checked: boolean) => {
+    setFormData((prev) => prev ? ({ ...prev, sendNotification: checked }) : null);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -63,12 +89,21 @@ export const EditAppointmentDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="professional">Profissional</Label>
-            <Input
-              id="professional"
-              name="professional"
+            <Select
               value={formData.professional}
-              onChange={handleInputChange}
-            />
+              onValueChange={handleProfessionalChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um profissional" />
+              </SelectTrigger>
+              <SelectContent>
+                {professionals.map((prof) => (
+                  <SelectItem key={prof} value={prof}>
+                    {prof}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="client">Cliente</Label>
@@ -107,6 +142,20 @@ export const EditAppointmentDialog = ({
               value={formData.status}
               onChange={handleInputChange}
             />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="sendNotification"
+              checked={formData.sendNotification || false}
+              onCheckedChange={handleNotificationChange}
+              className="data-[state=checked]:bg-primary"
+            />
+            <Label
+              htmlFor="sendNotification"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Notificar o paciente
+            </Label>
           </div>
           <DialogFooter>
             <Button type="submit">Salvar Alterações</Button>
