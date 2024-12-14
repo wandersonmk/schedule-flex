@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, WhatsApp } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -18,6 +18,7 @@ interface Appointment {
   date: string;
   time: string;
   status: string;
+  whatsapp?: string;
 }
 
 interface AppointmentsTableProps {
@@ -39,6 +40,11 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const openWhatsApp = (phoneNumber: string) => {
+  const formattedNumber = phoneNumber.replace(/\D/g, '');
+  window.open(`https://wa.me/55${formattedNumber}`, '_blank');
+};
+
 export const AppointmentsTable = ({ appointments, onEdit, onDelete }: AppointmentsTableProps) => {
   return (
     <div className="rounded-md border">
@@ -48,6 +54,7 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
             <TableHead>Número</TableHead>
             <TableHead>Profissional</TableHead>
             <TableHead>Cliente</TableHead>
+            <TableHead>WhatsApp</TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Horário</TableHead>
             <TableHead>Status</TableHead>
@@ -60,6 +67,19 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
               <TableCell>{appointment.id.replace('APT', '')}</TableCell>
               <TableCell>{appointment.professional}</TableCell>
               <TableCell>{appointment.client}</TableCell>
+              <TableCell>
+                {appointment.whatsapp && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:text-green-500 flex items-center gap-2"
+                    onClick={() => openWhatsApp(appointment.whatsapp!)}
+                  >
+                    <WhatsApp className="h-4 w-4 text-green-500" />
+                    {appointment.whatsapp}
+                  </Button>
+                )}
+              </TableCell>
               <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
               <TableCell>{appointment.time}</TableCell>
               <TableCell>
