@@ -103,9 +103,15 @@ const Index = () => {
       </div>
 
       {/* Lado direito - Imagem */}
-      <div className="hidden md:block md:w-1/2 bg-cover bg-center" style={{
-        backgroundImage: "url('/lovable-uploads/7ffcef83-575e-412f-a0e1-9e70cb63fd3b.png')"
-      }}>
+      <div className="hidden md:block md:w-1/2 bg-[#9b87f5] bg-opacity-10">
+        <div className="h-full flex items-center justify-center p-8">
+          <img 
+            src="/lovable-uploads/7ffcef83-575e-412f-a0e1-9e70cb63fd3b.png" 
+            alt="Agzap Logo" 
+            className="max-w-full h-auto object-contain opacity-50"
+            style={{ maxHeight: '70vh' }}
+          />
+        </div>
       </div>
     </div>
   );
