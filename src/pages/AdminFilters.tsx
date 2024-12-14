@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { FilterSection } from "@/components/admin/FilterSection";
 import { AppointmentsTable } from "@/components/admin/AppointmentsTable";
 import { useToast } from "@/components/ui/use-toast";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 
 const mockAppointments = [
   {
@@ -67,29 +69,36 @@ const AdminFilters = () => {
   });
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Filtros Avançados</h1>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AdminSidebar />
+        <main className="flex-1 p-4 md:p-8 bg-gray-50 w-full overflow-x-hidden">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-gray-900">Filtros Avançados</h1>
+            </div>
+
+            <FilterSection
+              startDate={startDate}
+              endDate={endDate}
+              searchTerm={searchTerm}
+              professionalFilter={professionalFilter}
+              onStartDateChange={setStartDate}
+              onEndDateChange={setEndDate}
+              onSearchTermChange={setSearchTerm}
+              onProfessionalFilterChange={setProfessionalFilter}
+              onResetFilters={handleResetFilters}
+            />
+
+            <AppointmentsTable 
+              appointments={filteredAppointments}
+              onEdit={() => {}}
+              onDelete={() => {}}
+            />
+          </div>
+        </main>
       </div>
-
-      <FilterSection
-        startDate={startDate}
-        endDate={endDate}
-        searchTerm={searchTerm}
-        professionalFilter={professionalFilter}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-        onSearchTermChange={setSearchTerm}
-        onProfessionalFilterChange={setProfessionalFilter}
-        onResetFilters={handleResetFilters}
-      />
-
-      <AppointmentsTable 
-        appointments={filteredAppointments}
-        onEdit={() => {}}
-        onDelete={() => {}}
-      />
-    </div>
+    </SidebarProvider>
   );
 };
 
