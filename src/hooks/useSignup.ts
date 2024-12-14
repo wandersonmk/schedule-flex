@@ -17,6 +17,8 @@ export const useSignup = (setIsLogin: (value: boolean) => void) => {
   ) => {
     setIsLoading(true);
     try {
+      console.log("Iniciando signup...");
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -31,7 +33,7 @@ export const useSignup = (setIsLogin: (value: boolean) => void) => {
       if (error) {
         console.error("Erro ao criar conta:", error);
         
-        if (error.message === "User already registered") {
+        if (error.message.includes("User already registered")) {
           setShowUserExistsDialog(true);
           return;
         }
@@ -45,10 +47,14 @@ export const useSignup = (setIsLogin: (value: boolean) => void) => {
       }
 
       if (data?.user) {
+        // Aguardar um momento para garantir que os triggers do banco foram executados
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         toast({
           title: "Conta criada com sucesso!",
           description: "Você será redirecionado para o painel.",
         });
+        
         navigate("/admin");
       }
     } catch (error: any) {

@@ -1,72 +1,51 @@
-import { format } from "date-fns";
-import { Edit, Trash2, MessageCircle } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Pencil, Trash2 } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Appointment {
   id: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  notes?: string;
   professional: {
     name: string;
+    specialty: string;
   };
   client: {
     name: string;
     phone?: string;
   };
-  start_time: string;
-  end_time: string;
-  status: string;
 }
 
-interface AppointmentsTableProps {
+export interface AppointmentsTableProps {
   appointments: Appointment[];
+  isLoading?: boolean; // Adicionado isLoading como opcional
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Confirmado":
-      return "bg-green-100 text-green-800";
-    case "Pendente":
-      return "bg-yellow-100 text-yellow-800";
-    case "Cancelado":
-      return "bg-red-100 text-red-800";
-    default:
-      return "";
+export const AppointmentsTable = ({
+  appointments,
+  isLoading,
+  onEdit,
+  onDelete,
+}: AppointmentsTableProps) => {
+  if (isLoading) {
+    return <div>Carregando...</div>;
   }
-};
 
-const openWhatsApp = (phoneNumber: string) => {
-  const formattedNumber = phoneNumber.replace(/\D/g, '');
-  window.open(`https://wa.me/55${formattedNumber}`, '_blank');
-};
-
-export const AppointmentsTable = ({ appointments, onEdit, onDelete }: AppointmentsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Número</TableHead>
-            <TableHead>Profissional</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>WhatsApp</TableHead>
             <TableHead>Data</TableHead>
             <TableHead>Horário</TableHead>
+            <TableHead>Profissional</TableHead>
+            <TableHead>Cliente</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
@@ -74,63 +53,48 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
         <TableBody>
           {appointments.map((appointment) => (
             <TableRow key={appointment.id}>
-              <TableCell>{appointment.id.replace('APT', '')}</TableCell>
-              <TableCell>{appointment.professional.name}</TableCell>
-              <TableCell>{appointment.client.name}</TableCell>
               <TableCell>
-                {appointment.client.phone && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center gap-2"
-                          onClick={() => openWhatsApp(appointment.client.phone!)}
-                        >
-                          <MessageCircle className="h-4 w-4 text-green-600" />
-                          {appointment.client.phone}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Chamar no WhatsApp</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
+                {format(new Date(appointment.start_time), "dd/MM/yyyy", {
+                  locale: ptBR,
+                })}
               </TableCell>
-              <TableCell>{format(new Date(appointment.start_time), "dd/MM/yyyy")}</TableCell>
-              <TableCell>{format(new Date(appointment.start_time), "HH:mm")}</TableCell>
               <TableCell>
-                <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(appointment.status))}>
-                  {appointment.status}
+                {format(new Date(appointment.start_time), "HH:mm")} -{" "}
+                {format(new Date(appointment.end_time), "HH:mm")}
+              </TableCell>
+              <TableCell>
+                {appointment.professional.name}
+                <br />
+                <span className="text-sm text-gray-500">
+                  {appointment.professional.specialty}
                 </span>
               </TableCell>
+              <TableCell>
+                {appointment.client.name}
+                {appointment.client.phone && (
+                  <br />
+                  <span className="text-sm text-gray-500">
+                    {appointment.client.phone}
+                  </span>
+                )}
+              </TableCell>
+              <TableCell>{appointment.status}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onEdit(appointment.id)}
-                          className="hover:bg-gray-50 text-gray-700 hover:text-gray-900"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Editar agendamento</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <div className="flex justify-end space-x-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
+                    onClick={() => onEdit(appointment.id)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700"
                     onClick={() => onDelete(appointment.id)}
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>

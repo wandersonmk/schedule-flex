@@ -32,6 +32,7 @@ interface Professional {
 
 interface ProfessionalsTableProps {
   professionals: Professional[];
+  isLoading?: boolean; // Adicionado isLoading como opcional
   onEdit: (professional: Professional) => void;
   onDelete: (id: string) => void;
 }
