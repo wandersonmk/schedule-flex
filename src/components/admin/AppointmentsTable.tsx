@@ -1,28 +1,41 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-interface Appointment {
-  id: string;
-  start_time: string;
-  end_time: string;
-  status: string;
-  notes?: string;
-  professional: {
-    name: string;
-    specialty: string;
-  };
-  client: {
-    name: string;
-    phone?: string;
-  };
-}
+import { MoreHorizontal, Trash } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export interface AppointmentsTableProps {
-  appointments: Appointment[];
-  isLoading?: boolean;
+  appointments: {
+    id: string;
+    professional_id: string;
+    client_id: string;
+    start_time: string;
+    end_time: string;
+    status: string;
+    notes?: string;
+    professional: {
+      name: string;
+      specialty: string;
+    };
+    client: {
+      name: string;
+      phone?: string;
+    };
+  }[];
+  isLoading: boolean;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
@@ -34,7 +47,11 @@ export const AppointmentsTable = ({
   onDelete,
 }: AppointmentsTableProps) => {
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
@@ -47,7 +64,7 @@ export const AppointmentsTable = ({
             <TableHead>Profissional</TableHead>
             <TableHead>Cliente</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Ações</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -59,8 +76,13 @@ export const AppointmentsTable = ({
                 })}
               </TableCell>
               <TableCell>
-                {format(new Date(appointment.start_time), "HH:mm")} -{" "}
-                {format(new Date(appointment.end_time), "HH:mm")}
+                {format(new Date(appointment.start_time), "HH:mm", {
+                  locale: ptBR,
+                })}
+                {" - "}
+                {format(new Date(appointment.end_time), "HH:mm", {
+                  locale: ptBR,
+                })}
               </TableCell>
               <TableCell>
                 {appointment.professional.name}
@@ -81,24 +103,27 @@ export const AppointmentsTable = ({
                 )}
               </TableCell>
               <TableCell>{appointment.status}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => onEdit(appointment.id)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => onDelete(appointment.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Abrir menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onEdit(appointment.id)}>
+                      Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDelete(appointment.id)}
+                      className="text-red-600"
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Excluir
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
