@@ -58,7 +58,7 @@ const Index = () => {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <img 
-              src="/lovable-uploads/7ffcef83-575e-412f-a0e1-9e70cb63fd3b.png" 
+              src="/lovable-uploads/62034df4-f2bf-49e0-93fa-1bcdc61cf498.png" 
               alt="Agzap Logo" 
               className="h-12"
             />
