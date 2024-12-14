@@ -8,34 +8,18 @@ export const useLogout = () => {
 
   const logout = async () => {
     try {
-      // First try to get the current session
-      const { data: { session } } = await supabase.auth.getSession();
+      await supabase.auth.signOut();
       
-      // If there's no session, just redirect to login
-      if (!session) {
-        navigate('/login');
-        return;
-      }
-
-      // Attempt to sign out
-      const { error } = await supabase.auth.signOut();
+      // Limpar qualquer dado local
+      localStorage.clear();
       
-      // If we get a user_not_found error, the session is already invalid
-      // We can safely ignore this and proceed with logout
-      if (error && !error.message.includes('user_not_found')) {
-        throw error;
-      }
-
-      // Show success message
+      // Mostrar mensagem de sucesso
       toast({
         title: "Logout realizado com sucesso!",
         description: "Você foi desconectado com sucesso.",
       });
       
-      // Clear any local storage or state if needed
-      localStorage.removeItem('supabase.auth.token');
-      
-      // Redirect to login page
+      // Redirecionar para a página de login
       navigate('/login');
       
     } catch (error: any) {
@@ -47,7 +31,7 @@ export const useLogout = () => {
         description: "Ocorreu um erro ao tentar desconectar. Tente novamente.",
       });
       
-      // Still redirect to login page for safety
+      // Ainda redireciona para a página de login por segurança
       navigate('/login');
     }
   };
