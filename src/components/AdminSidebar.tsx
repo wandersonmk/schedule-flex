@@ -52,7 +52,7 @@ export const AdminSidebar = () => {
       <SidebarContent className="bg-gradient-to-b from-primary-100 to-primary-200">
         <div className="flex justify-end p-2">
           <SidebarTrigger 
-            className="text-primary-800 hover:text-primary-900 hover:bg-white/20"
+            className="text-primary-800 hover:text-primary-900 hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-2 top-2 z-50"
           >
             {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
           </SidebarTrigger>
