@@ -80,7 +80,7 @@ const formatAvailability = (availability: WeeklySchedule): string => {
     })
     .join(", ");
 
-  return availableDays || "Não definida";
+  return availableDays || "Profissional indisponível";
 };
 
 export const ProfessionalsTable = ({
@@ -128,7 +128,11 @@ export const ProfessionalsTable = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className={`flex items-center gap-2 ${!professional.availability || Object.entries(professional.availability).filter(([_, schedule]) => schedule.enabled).length === 0 ? 'text-red-500' : ''}`}
+                      >
                         <Clock className="h-4 w-4" />
                         <span className="truncate max-w-[200px]">
                           {formatAvailability(professional.availability)}
