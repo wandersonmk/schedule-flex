@@ -9,7 +9,6 @@ import { CreateAppointmentDialog } from "./admin/CreateAppointmentDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { DashboardMetrics } from "./admin/dashboard/DashboardMetrics";
 import { AppointmentsChart } from "./admin/dashboard/AppointmentsChart";
-import { ExportButton } from "./admin/ExportButton";
 
 const mockAppointments = [
   {
@@ -139,16 +138,13 @@ export const AdminDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-        <div className="flex gap-2">
-          <Button 
-            onClick={() => setCreateDialogOpen(true)} 
-            className="flex items-center gap-2 bg-primary hover:bg-primary-600 active:bg-primary-700 transform transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
-          >
-            <Plus className="h-4 w-4" />
-            Novo Agendamento
-          </Button>
-          <ExportButton data={filteredAppointments} />
-        </div>
+        <Button 
+          onClick={() => setCreateDialogOpen(true)} 
+          className="flex items-center gap-2 bg-primary hover:bg-primary-600 active:bg-primary-700 transform transition-all duration-200 ease-in-out hover:scale-105 active:scale-95"
+        >
+          <Plus className="h-4 w-4" />
+          Novo Agendamento
+        </Button>
       </div>
 
       <DashboardMetrics />
