@@ -26,6 +26,12 @@ const professionals = [
   "Dr. Lima",
 ];
 
+const statusOptions = [
+  "Confirmado",
+  "Pendente",
+  "Cancelado",
+];
+
 interface Appointment {
   id: string;
   professional: string;
@@ -74,6 +80,10 @@ export const EditAppointmentDialog = ({
 
   const handleProfessionalChange = (value: string) => {
     setFormData((prev) => prev ? ({ ...prev, professional: value }) : null);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setFormData((prev) => prev ? ({ ...prev, status: value }) : null);
   };
 
   const handleNotificationChange = (checked: boolean) => {
@@ -136,12 +146,21 @@ export const EditAppointmentDialog = ({
           </div>
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
-            <Input
-              id="status"
-              name="status"
+            <Select
               value={formData.status}
-              onChange={handleInputChange}
-            />
+              onValueChange={handleStatusChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecione um status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
