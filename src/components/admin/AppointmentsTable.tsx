@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { Edit, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -7,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface Appointment {
@@ -20,6 +22,8 @@ interface Appointment {
 
 interface AppointmentsTableProps {
   appointments: Appointment[];
+  onEdit: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -35,7 +39,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export const AppointmentsTable = ({ appointments }: AppointmentsTableProps) => {
+export const AppointmentsTable = ({ appointments, onEdit, onDelete }: AppointmentsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
@@ -47,6 +51,7 @@ export const AppointmentsTable = ({ appointments }: AppointmentsTableProps) => {
             <TableHead>Data</TableHead>
             <TableHead>Horário</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,6 +66,24 @@ export const AppointmentsTable = ({ appointments }: AppointmentsTableProps) => {
                 <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(appointment.status))}>
                   {appointment.status}
                 </span>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onEdit(appointment.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onDelete(appointment.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}

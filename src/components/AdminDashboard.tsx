@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { FilterSection } from "./admin/FilterSection";
 import { AppointmentsTable } from "./admin/AppointmentsTable";
 
@@ -60,6 +60,21 @@ export const AdminDashboard = () => {
     setProfessionalFilter("");
   };
 
+  const handleCreateAppointment = () => {
+    // TODO: Implement create appointment logic
+    console.log("Create new appointment");
+  };
+
+  const handleEditAppointment = (id: string) => {
+    // TODO: Implement edit appointment logic
+    console.log("Edit appointment", id);
+  };
+
+  const handleDeleteAppointment = (id: string) => {
+    // TODO: Implement delete appointment logic
+    console.log("Delete appointment", id);
+  };
+
   const filteredAppointments = mockAppointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.date);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -81,10 +96,16 @@ export const AdminDashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-        <Button onClick={handleExportData} variant="outline" className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Exportar Dados
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleCreateAppointment} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Agendamento
+          </Button>
+          <Button onClick={handleExportData} variant="outline" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Exportar Dados
+          </Button>
+        </div>
       </div>
 
       <FilterSection
@@ -99,7 +120,11 @@ export const AdminDashboard = () => {
         onResetFilters={handleResetFilters}
       />
 
-      <AppointmentsTable appointments={filteredAppointments} />
+      <AppointmentsTable 
+        appointments={filteredAppointments}
+        onEdit={handleEditAppointment}
+        onDelete={handleDeleteAppointment}
+      />
     </div>
   );
 };
