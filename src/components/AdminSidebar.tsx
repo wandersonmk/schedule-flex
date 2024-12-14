@@ -39,10 +39,10 @@ export const AdminSidebar = () => {
       tooltip: "Visualizar dashboard",
     },
     {
-      title: "Calendário",
+      title: "Agendamentos",
       icon: Calendar,
       url: "/admin/calendar",
-      tooltip: "Visualizar calendário",
+      tooltip: "Visualizar agendamentos",
     },
     {
       title: "Profissionais",
