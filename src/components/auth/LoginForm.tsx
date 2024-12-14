@@ -30,9 +30,9 @@ export const LoginForm = () => {
       
       if (!user) throw new Error("Usuário não encontrado");
 
-      // Fetch user's organization
+      // Buscar organização do usuário
       const { data: orgMember, error: orgError } = await supabase
-        .from('organization_members')
+        .from('membros_organizacao')
         .select('organization_id, role')
         .eq('user_id', user.id)
         .single();

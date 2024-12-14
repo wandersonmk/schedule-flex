@@ -65,6 +65,18 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         throw signUpError;
       }
 
+      // Verificar se a organização foi criada
+      const { data: orgMember, error: orgError } = await supabase
+        .from('membros_organizacao')
+        .select('organization_id, role')
+        .eq('user_id', data.user?.id)
+        .single();
+
+      if (orgError) {
+        console.error("Erro ao verificar organização:", orgError);
+        throw new Error("Erro ao criar organização");
+      }
+
       toast({
         title: "Conta criada com sucesso!",
         description: "Você será redirecionado para o painel.",
