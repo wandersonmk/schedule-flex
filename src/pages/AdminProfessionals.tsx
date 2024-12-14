@@ -1,122 +1,38 @@
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
-import { useToast } from "@/hooks/use-toast";
 import { AddProfessionalModal } from "@/components/professionals/AddProfessionalModal";
 import { ProfessionalsTable } from "@/components/professionals/ProfessionalsTable";
 import { EditProfessionalModal } from "@/components/professionals/EditProfessionalModal";
-
-interface TimeSlot {
-  start: string;
-  end: string;
-}
-
-interface DaySchedule {
-  enabled: boolean;
-  timeSlots: TimeSlot;
-}
-
-interface WeeklySchedule {
-  [key: string]: DaySchedule;
-}
-
-interface Professional {
-  id: string;
-  name: string;
-  specialty: string;
-  email: string;
-  phone: string;
-  availability: WeeklySchedule;
-}
+import { useProfessionals } from "@/hooks/useProfessionals";
 
 const AdminProfessionals = () => {
-  const [professionals, setProfessionals] = useState<Professional[]>([
-    {
-      id: "1",
-      name: "Dr. João Silva",
-      specialty: "Clínico Geral",
-      email: "joao.silva@exemplo.com",
-      phone: "(11) 99999-9999",
-      availability: {
-        monday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        tuesday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        wednesday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        thursday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        friday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        saturday: {
-          enabled: false,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        sunday: {
-          enabled: false,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-      },
-    },
-  ]);
-
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
 
-  const handleAddProfessional = (newProfessional: Omit<Professional, "id">) => {
-    const professional = {
-      id: Date.now().toString(),
-      ...newProfessional,
-    };
-    setProfessionals((prev) => [...prev, professional]);
+  const {
+    professionals,
+    isLoading,
+    createProfessional,
+    updateProfessional,
+    deleteProfessional
+  } = useProfessionals();
+
+  const handleAddProfessional = async (professionalData: any) => {
+    await createProfessional.mutateAsync(professionalData);
   };
 
-  const handleEditProfessional = (professional: Professional) => {
+  const handleEditProfessional = (professional: any) => {
     setSelectedProfessional(professional);
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateProfessional = (updatedProfessional: Professional) => {
-    setProfessionals((prev) =>
-      prev.map((p) =>
-        p.id === updatedProfessional.id ? updatedProfessional : p
-      )
-    );
+  const handleUpdateProfessional = async (professionalData: any) => {
+    await updateProfessional.mutateAsync(professionalData);
   };
 
-  const handleDeleteProfessional = (id: string) => {
-    setProfessionals((prev) => prev.filter((p) => p.id !== id));
+  const handleDeleteProfessional = async (id: string) => {
+    await deleteProfessional.mutateAsync(id);
   };
 
   return (
@@ -133,7 +49,8 @@ const AdminProfessionals = () => {
             </div>
 
             <ProfessionalsTable
-              professionals={professionals}
+              professionals={professionals || []}
+              isLoading={isLoading}
               onEdit={handleEditProfessional}
               onDelete={handleDeleteProfessional}
             />
