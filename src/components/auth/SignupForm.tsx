@@ -1,9 +1,6 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SignupFields } from "./SignupFields";
+import { useSignup } from "@/hooks/useSignup";
 
 interface SignupFormProps {
   setIsLogin: (value: boolean) => void;
@@ -26,14 +25,17 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showUserExistsDialog, setShowUserExistsDialog] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  
   const { toast } = useToast();
+  
+  const {
+    isLoading,
+    showUserExistsDialog,
+    setShowUserExistsDialog,
+    handleSignup,
+  } = useSignup(setIsLogin);
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     
     if (password !== confirmPassword) {
       toast({
@@ -41,7 +43,6 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         description: "As senhas não coincidem.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
 
@@ -51,132 +52,32 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         description: "A senha deve ter pelo menos 6 caracteres.",
         variant: "destructive",
       });
-      setIsLoading(false);
       return;
     }
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            nome_empresa: nomeEmpresa,
-            nome_usuario: nomeUsuario,
-          },
-        },
-      });
-
-      if (error) {
-        console.error("Erro ao criar conta:", error);
-        
-        if (error.message === "User already registered") {
-          setShowUserExistsDialog(true);
-          return;
-        }
-
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data?.user) {
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar sua conta.",
-        });
-        setIsLogin(true);
-      }
-    } catch (error: any) {
-      console.error("Erro detalhado:", error);
-      toast({
-        title: "Erro ao criar conta",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    await handleSignup(email, password, nomeEmpresa, nomeUsuario);
   };
 
   return (
     <>
       <form onSubmit={handleCreateAccount} className="space-y-6">
-        <div className="space-y-4">
-          <Input
-            type="text"
-            placeholder="Nome da sua empresa"
-            value={nomeEmpresa}
-            onChange={(e) => setNomeEmpresa(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <Input
-            type="text"
-            placeholder="Digite o seu nome"
-            value={nomeUsuario}
-            onChange={(e) => setNomeUsuario(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <div className="relative">
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              minLength={6}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              disabled={isLoading}
-            >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-          <div className="relative">
-            <Input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirme sua senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              minLength={6}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              disabled={isLoading}
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
+        <SignupFields
+          nomeEmpresa={nomeEmpresa}
+          setNomeEmpresa={setNomeEmpresa}
+          nomeUsuario={nomeUsuario}
+          setNomeUsuario={setNomeUsuario}
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          showPassword={showPassword}
+          setShowPassword={setShowPassword}
+          showConfirmPassword={showConfirmPassword}
+          setShowConfirmPassword={setShowConfirmPassword}
+          isLoading={isLoading}
+        />
 
         <Button
           type="submit"
