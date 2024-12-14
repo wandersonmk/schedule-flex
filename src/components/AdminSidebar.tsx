@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const AdminSidebar = () => {
   const { state } = useSidebar();
@@ -97,14 +98,25 @@ export const AdminSidebar = () => {
     },
   ];
 
-  const handleLogout = () => {
-    // Here you would typically clear any auth tokens or user data from storage
-    // For now, we'll just show a toast and redirect to home
-    toast({
-      title: "Logout realizado",
-      description: "Você foi desconectado com sucesso.",
-    });
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      toast({
+        title: "Logout realizado",
+        description: "Você foi desconectado com sucesso.",
+      });
+      
+      navigate('/');
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer logout",
+        description: "Ocorreu um erro ao tentar desconectar. Tente novamente.",
+      });
+    }
   };
 
   return (
