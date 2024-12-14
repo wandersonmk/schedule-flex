@@ -1,26 +1,13 @@
 import { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
+import { useToast } from "@/hooks/use-toast";
+import { AddProfessionalModal } from "@/components/professionals/AddProfessionalModal";
+import { ProfessionalsTable } from "@/components/professionals/ProfessionalsTable";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/use-toast";
-import { UserPlus, Pencil, Trash2 } from "lucide-react";
 
 interface Professional {
   id: string;
@@ -41,7 +28,6 @@ const AdminProfessionals = () => {
     },
   ]);
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [formData, setFormData] = useState({
@@ -53,36 +39,12 @@ const AdminProfessionals = () => {
 
   const { toast } = useToast();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      specialty: "",
-      email: "",
-      phone: "",
-    });
-  };
-
-  const handleAddProfessional = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newProfessional = {
+  const handleAddProfessional = (newProfessional: Omit<Professional, "id">) => {
+    const professional = {
       id: Date.now().toString(),
-      ...formData,
+      ...newProfessional,
     };
-    setProfessionals((prev) => [...prev, newProfessional]);
-    setIsAddDialogOpen(false);
-    resetForm();
-    toast({
-      title: "Profissional adicionado",
-      description: "O profissional foi adicionado com sucesso.",
-    });
+    setProfessionals((prev) => [...prev, professional]);
   };
 
   const handleEditProfessional = (professional: Professional) => {
@@ -108,7 +70,12 @@ const AdminProfessionals = () => {
       )
     );
     setIsEditDialogOpen(false);
-    resetForm();
+    setFormData({
+      name: "",
+      specialty: "",
+      email: "",
+      phone: "",
+    });
     toast({
       title: "Profissional atualizado",
       description: "As informações foram atualizadas com sucesso.",
@@ -125,6 +92,14 @@ const AdminProfessionals = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -132,110 +107,17 @@ const AdminProfessionals = () => {
         <main className="flex-1 p-4 md:p-8 bg-gray-50 w-full overflow-x-hidden">
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Gerenciamento de Profissionais</h1>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Adicionar Profissional
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Adicionar Novo Profissional</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddProfessional} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Nome</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="specialty">Especialidade</Label>
-                      <Input
-                        id="specialty"
-                        name="specialty"
-                        value={formData.specialty}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <Button type="submit" className="w-full">
-                      Adicionar
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Gerenciamento de Profissionais
+              </h1>
+              <AddProfessionalModal onAddProfessional={handleAddProfessional} />
             </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Especialidade</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Telefone</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {professionals.map((professional) => (
-                    <TableRow key={professional.id}>
-                      <TableCell>{professional.name}</TableCell>
-                      <TableCell>{professional.specialty}</TableCell>
-                      <TableCell>{professional.email}</TableCell>
-                      <TableCell>{professional.phone}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEditProfessional(professional)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleDeleteProfessional(professional.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <ProfessionalsTable
+              professionals={professionals}
+              onEdit={handleEditProfessional}
+              onDelete={handleDeleteProfessional}
+            />
           </div>
 
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
