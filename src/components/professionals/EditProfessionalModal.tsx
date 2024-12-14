@@ -96,55 +96,57 @@ export const EditProfessionalModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Editar Profissional</DialogTitle>
           <DialogDescription>
             Atualize as informações do profissional e sua disponibilidade semanal.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[calc(90vh-180px)]">
-          <form onSubmit={handleUpdateProfessional} className="space-y-4 p-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Nome</Label>
-              <Input
-                id="edit-name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-specialty">Especialidade</Label>
-              <Input
-                id="edit-specialty"
-                name="specialty"
-                value={formData.specialty}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">Email</Label>
-              <Input
-                id="edit-email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-phone">Telefone</Label>
-              <Input
-                id="edit-phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-              />
+        <ScrollArea className="h-[60vh] pr-4">
+          <form onSubmit={handleUpdateProfessional} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Nome</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-specialty">Especialidade</Label>
+                <Input
+                  id="edit-specialty"
+                  name="specialty"
+                  value={formData.specialty}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Telefone</Label>
+                <Input
+                  id="edit-phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
             </div>
 
             <div className="border-t pt-4">

@@ -86,15 +86,15 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
           Adicionar Profissional
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Profissional</DialogTitle>
           <DialogDescription>
             Preencha os dados do novo profissional e defina sua disponibilidade semanal.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[calc(90vh-180px)]">
-          <form onSubmit={handleSubmit} className="space-y-6 p-4">
+        <ScrollArea className="h-[60vh] pr-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome</Label>
