@@ -7,9 +7,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Calendar, Download, Filter, List } from "lucide-react";
+import { Calendar, Download, Filter, List, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const AdminSidebar = () => {
@@ -49,6 +50,13 @@ export const AdminSidebar = () => {
       variant="floating"
     >
       <SidebarContent className="bg-gradient-to-b from-primary-100 to-primary-200">
+        <div className="flex justify-end p-2">
+          <SidebarTrigger 
+            className="text-primary-800 hover:text-primary-900 hover:bg-white/20"
+          >
+            {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+          </SidebarTrigger>
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel className="text-primary-800 font-semibold px-4 py-2">
             Administração
