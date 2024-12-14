@@ -15,7 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import InputMask from "react-input-mask";
 
 // Lista de profissionais (pode ser movida para um arquivo separado posteriormente)
 const professionals = [
@@ -35,6 +37,8 @@ interface CreateAppointmentDialogProps {
     date: string;
     time: string;
     status: string;
+    whatsapp?: string;
+    sendNotification?: boolean;
   }) => void;
 }
 
@@ -47,6 +51,8 @@ export const CreateAppointmentDialog = ({
   const [client, setClient] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [sendNotification, setSendNotification] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,11 +62,15 @@ export const CreateAppointmentDialog = ({
       date,
       time,
       status: "Pendente",
+      whatsapp,
+      sendNotification,
     });
     setProfessional("");
     setClient("");
     setDate("");
     setTime("");
+    setWhatsapp("");
+    setSendNotification(false);
   };
 
   return (
@@ -100,6 +110,24 @@ export const CreateAppointmentDialog = ({
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="whatsapp">WhatsApp</Label>
+              <InputMask
+                mask="(99) 99999-9999"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                required
+              >
+                {(inputProps: any) => (
+                  <Input
+                    {...inputProps}
+                    id="whatsapp"
+                    type="tel"
+                    placeholder="(11) 91234-5678"
+                  />
+                )}
+              </InputMask>
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="date">Data</Label>
               <Input
                 id="date"
@@ -118,6 +146,20 @@ export const CreateAppointmentDialog = ({
                 onChange={(e) => setTime(e.target.value)}
                 required
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="sendNotification"
+                checked={sendNotification}
+                onCheckedChange={(checked) => setSendNotification(checked as boolean)}
+                className="data-[state=checked]:bg-primary"
+              />
+              <Label
+                htmlFor="sendNotification"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Notificar o paciente
+              </Label>
             </div>
           </div>
           <DialogFooter>
