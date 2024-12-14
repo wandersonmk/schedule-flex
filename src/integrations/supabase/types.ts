@@ -9,24 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      perfis: {
         Row: {
-          company_name: string | null
-          created_at: string
+          criado_em: string
           id: string
-          user_name: string | null
+          nome_empresa: string | null
+          nome_usuario: string | null
         }
         Insert: {
-          company_name?: string | null
-          created_at?: string
+          criado_em?: string
           id: string
-          user_name?: string | null
+          nome_empresa?: string | null
+          nome_usuario?: string | null
         }
         Update: {
-          company_name?: string | null
-          created_at?: string
+          criado_em?: string
           id?: string
-          user_name?: string | null
+          nome_empresa?: string | null
+          nome_usuario?: string | null
         }
         Relationships: []
       }

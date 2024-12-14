@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface SignupFormProps {
   setIsLogin: (value: boolean) => void;
@@ -12,13 +13,14 @@ interface SignupFormProps {
 export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [userName, setUserName] = useState("");
+  const [nomeEmpresa, setNomeEmpresa] = useState("");
+  const [nomeUsuario, setNomeUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +40,8 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         password,
         options: {
           data: {
-            company_name: companyName,
-            user_name: userName,
+            nome_empresa: nomeEmpresa,
+            nome_usuario: nomeUsuario,
           },
         },
       });
@@ -50,7 +52,8 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         title: "Conta criada com sucesso!",
         description: "Você pode fazer login agora.",
       });
-      setIsLogin(true);
+      
+      navigate("/admin");
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
@@ -66,15 +69,15 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         <Input
           type="text"
           placeholder="Nome da sua empresa"
-          value={companyName}
-          onChange={(e) => setCompanyName(e.target.value)}
+          value={nomeEmpresa}
+          onChange={(e) => setNomeEmpresa(e.target.value)}
           required
         />
         <Input
           type="text"
           placeholder="Digite o seu nome"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          value={nomeUsuario}
+          onChange={(e) => setNomeUsuario(e.target.value)}
           required
         />
         <Input
@@ -87,7 +90,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         <div className="relative">
           <Input
             type={showPassword ? "text" : "password"}
-            placeholder="Password"
+            placeholder="Senha"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -107,7 +110,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         <div className="relative">
           <Input
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm Password"
+            placeholder="Confirme sua senha"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
