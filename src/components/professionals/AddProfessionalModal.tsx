@@ -11,6 +11,17 @@ import { Label } from "@/components/ui/label";
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { AvailabilitySchedule } from "./AvailabilitySchedule";
+
+interface WeeklySchedule {
+  [key: string]: {
+    enabled: boolean;
+    timeSlots: {
+      start: string;
+      end: string;
+    };
+  };
+}
 
 interface AddProfessionalModalProps {
   onAddProfessional: (professional: {
@@ -18,6 +29,7 @@ interface AddProfessionalModalProps {
     specialty: string;
     email: string;
     phone: string;
+    availability: WeeklySchedule;
   }) => void;
 }
 
@@ -28,6 +40,7 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
     specialty: "",
     email: "",
     phone: "",
+    availability: {} as WeeklySchedule,
   });
   const { toast } = useToast();
 
@@ -39,6 +52,13 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
     }));
   };
 
+  const handleAvailabilityChange = (schedule: WeeklySchedule) => {
+    setFormData((prev) => ({
+      ...prev,
+      availability: schedule,
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAddProfessional(formData);
@@ -47,6 +67,7 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
       specialty: "",
       email: "",
       phone: "",
+      availability: {} as WeeklySchedule,
     });
     setIsOpen(false);
     toast({
@@ -63,52 +84,59 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
           Adicionar Profissional
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Profissional</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nome</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="specialty">Especialidade</Label>
+              <Input
+                id="specialty"
+                name="specialty"
+                value={formData.specialty}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Telefone</Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="specialty">Especialidade</Label>
-            <Input
-              id="specialty"
-              name="specialty"
-              value={formData.specialty}
-              onChange={handleInputChange}
-              required
-            />
+          
+          <div className="border-t pt-4">
+            <AvailabilitySchedule onChange={handleAvailabilityChange} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Telefone</Label>
-            <Input
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+
           <Button type="submit" className="w-full">
             Adicionar
           </Button>

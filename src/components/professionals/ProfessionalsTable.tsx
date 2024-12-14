@@ -7,9 +7,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Clock } from "lucide-react";
 import { useState } from "react";
 import { DeleteAppointmentDialog } from "../admin/DeleteAppointmentDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface TimeSlot {
+  start: string;
+  end: string;
+}
+
+interface DaySchedule {
+  enabled: boolean;
+  timeSlots: TimeSlot;
+}
+
+interface WeeklySchedule {
+  [key: string]: DaySchedule;
+}
 
 interface Professional {
   id: string;
@@ -17,6 +37,7 @@ interface Professional {
   specialty: string;
   email: string;
   phone: string;
+  availability: WeeklySchedule;
 }
 
 interface ProfessionalsTableProps {
@@ -24,6 +45,27 @@ interface ProfessionalsTableProps {
   onEdit: (professional: Professional) => void;
   onDelete: (id: string) => void;
 }
+
+const formatAvailability = (availability: WeeklySchedule): string => {
+  const days = {
+    monday: "Seg",
+    tuesday: "Ter",
+    wednesday: "Qua",
+    thursday: "Qui",
+    friday: "Sex",
+    saturday: "Sáb",
+    sunday: "Dom",
+  };
+
+  const availableDays = Object.entries(availability)
+    .filter(([_, schedule]) => schedule.enabled)
+    .map(([day, schedule]) => {
+      return `${days[day as keyof typeof days]} ${schedule.timeSlots.start}-${schedule.timeSlots.end}`;
+    })
+    .join(", ");
+
+  return availableDays || "Não definida";
+};
 
 export const ProfessionalsTable = ({
   professionals,
@@ -55,6 +97,7 @@ export const ProfessionalsTable = ({
             <TableHead>Especialidade</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Telefone</TableHead>
+            <TableHead>Disponibilidade</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -65,6 +108,25 @@ export const ProfessionalsTable = ({
               <TableCell>{professional.specialty}</TableCell>
               <TableCell>{professional.email}</TableCell>
               <TableCell>{professional.phone}</TableCell>
+              <TableCell>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        <span className="truncate max-w-[200px]">
+                          {formatAvailability(professional.availability)}
+                        </span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="whitespace-pre-line">
+                        {formatAvailability(professional.availability)}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button
