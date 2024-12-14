@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import InputMask from "react-input-mask";
 
 const professionals = [
   "Dr. Silva",
@@ -123,6 +124,24 @@ export const EditAppointmentDialog = ({
               value={formData.client}
               onChange={handleInputChange}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="whatsapp">WhatsApp</Label>
+            <InputMask
+              mask="(99) 99999-9999"
+              value={formData.whatsapp || ""}
+              onChange={(e) => handleInputChange({ ...e, target: { ...e.target, name: 'whatsapp' } })}
+            >
+              {(inputProps: any) => (
+                <Input
+                  {...inputProps}
+                  id="whatsapp"
+                  name="whatsapp"
+                  type="tel"
+                  placeholder="(11) 91234-5678"
+                />
+              )}
+            </InputMask>
           </div>
           <div className="space-y-2">
             <Label htmlFor="date">Data</Label>
