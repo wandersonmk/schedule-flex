@@ -43,27 +43,30 @@ const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
   return `${hour}:00`;
 });
 
+const createDefaultSchedule = (): WeeklySchedule => {
+  const defaultSchedule: WeeklySchedule = {};
+  Object.keys(WEEK_DAYS).forEach((day) => {
+    defaultSchedule[day] = {
+      enabled: false,
+      timeSlots: {
+        start: "08:00",
+        end: "18:00",
+      },
+    };
+  });
+  return defaultSchedule;
+};
+
 export const AvailabilitySchedule = ({ onChange, initialSchedule }: AvailabilityScheduleProps) => {
   const [schedule, setSchedule] = useState<WeeklySchedule>(() => {
-    if (initialSchedule) {
+    if (initialSchedule && Object.keys(initialSchedule).length > 0) {
       return initialSchedule;
     }
-
-    const defaultSchedule: WeeklySchedule = {};
-    Object.keys(WEEK_DAYS).forEach((day) => {
-      defaultSchedule[day] = {
-        enabled: false,
-        timeSlots: {
-          start: "08:00",
-          end: "18:00",
-        },
-      };
-    });
-    return defaultSchedule;
+    return createDefaultSchedule();
   });
 
   useEffect(() => {
-    if (initialSchedule) {
+    if (initialSchedule && Object.keys(initialSchedule).length > 0) {
       setSchedule(initialSchedule);
     }
   }, [initialSchedule]);
@@ -108,15 +111,15 @@ export const AvailabilitySchedule = ({ onChange, initialSchedule }: Availability
             <div className="flex items-center space-x-2">
               <Checkbox
                 id={day}
-                checked={schedule[day].enabled}
+                checked={schedule[day]?.enabled || false}
                 onCheckedChange={() => handleDayToggle(day)}
               />
               <Label htmlFor={day}>{label}</Label>
             </div>
-            {schedule[day].enabled && (
+            {schedule[day]?.enabled && (
               <div className="flex items-center space-x-2">
                 <Select
-                  value={schedule[day].timeSlots.start}
+                  value={schedule[day]?.timeSlots.start}
                   onValueChange={(value) => handleTimeChange(day, "start", value)}
                 >
                   <SelectTrigger className="w-[120px]">
@@ -132,7 +135,7 @@ export const AvailabilitySchedule = ({ onChange, initialSchedule }: Availability
                 </Select>
                 <span>até</span>
                 <Select
-                  value={schedule[day].timeSlots.end}
+                  value={schedule[day]?.timeSlots.end}
                   onValueChange={(value) => handleTimeChange(day, "end", value)}
                 >
                   <SelectTrigger className="w-[120px]">
