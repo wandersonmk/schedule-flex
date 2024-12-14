@@ -4,7 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface SignupFormProps {
   setIsLogin: (value: boolean) => void;
@@ -18,9 +26,9 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showUserExistsDialog, setShowUserExistsDialog] = useState(false);
   
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +56,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
 
       if (error) {
         if (error.message === "User already registered") {
-          toast({
-            title: "Email já cadastrado",
-            description: "Este email já está sendo usado. Por favor, faça login ou use outro email.",
-            variant: "destructive",
-          });
+          setShowUserExistsDialog(true);
           return;
         }
         throw error;
@@ -63,7 +67,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
         description: "Você pode fazer login agora.",
       });
       
-      setIsLogin(true); // Redirect to login instead of admin since the user needs to verify email
+      setIsLogin(true);
     } catch (error: any) {
       toast({
         title: "Erro ao criar conta",
@@ -74,77 +78,98 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   };
 
   return (
-    <form onSubmit={handleCreateAccount} className="space-y-6">
-      <div className="space-y-4">
-        <Input
-          type="text"
-          placeholder="Nome da sua empresa"
-          value={nomeEmpresa}
-          onChange={(e) => setNomeEmpresa(e.target.value)}
-          required
-        />
-        <Input
-          type="text"
-          placeholder="Digite o seu nome"
-          value={nomeUsuario}
-          onChange={(e) => setNomeUsuario(e.target.value)}
-          required
-        />
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <div className="relative">
+    <>
+      <form onSubmit={handleCreateAccount} className="space-y-6">
+        <div className="space-y-4">
           <Input
-            type={showPassword ? "text" : "password"}
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            type="text"
+            placeholder="Nome da sua empresa"
+            value={nomeEmpresa}
+            onChange={(e) => setNomeEmpresa(e.target.value)}
             required
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            {showPassword ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
-              <Eye className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-        <div className="relative">
           <Input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirme sua senha"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            type="text"
+            placeholder="Digite o seu nome"
+            value={nomeUsuario}
+            onChange={(e) => setNomeUsuario(e.target.value)}
             required
           />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
-              <Eye className="h-5 w-5" />
-            )}
-          </button>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirme sua senha"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <Button
-        type="submit"
-        className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
-      >
-        Criar conta
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          className="w-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+        >
+          Criar conta
+        </Button>
+      </form>
+
+      <AlertDialog open={showUserExistsDialog} onOpenChange={setShowUserExistsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Usuário já cadastrado</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este email já está cadastrado em nossa plataforma. Por favor, faça login ou utilize outro email para criar uma nova conta.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowUserExistsDialog(false);
+              setIsLogin(true);
+            }}>
+              Ir para login
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
