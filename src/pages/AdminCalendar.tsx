@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FilterSection } from "@/components/admin/FilterSection";
 import { AppointmentsTable } from "@/components/admin/AppointmentsTable";
+import { useToast } from "@/components/ui/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Button } from "@/components/ui/button";
@@ -8,9 +9,36 @@ import { Plus } from "lucide-react";
 import { CreateAppointmentDialog } from "@/components/admin/CreateAppointmentDialog";
 import { EditAppointmentDialog } from "@/components/admin/EditAppointmentDialog";
 import { DeleteAppointmentDialog } from "@/components/admin/DeleteAppointmentDialog";
-import { useAppointments } from "@/hooks/useAppointments";
+
+const mockAppointments = [
+  {
+    id: "APT001",
+    professional: "Dr. Silva",
+    client: "João Santos",
+    date: "2024-03-20",
+    time: "09:00",
+    status: "Confirmado",
+  },
+  {
+    id: "APT002",
+    professional: "Dra. Costa",
+    client: "Maria Oliveira",
+    date: "2024-03-20",
+    time: "10:00",
+    status: "Pendente",
+  },
+  {
+    id: "APT003",
+    professional: "Dr. Santos",
+    client: "Pedro Lima",
+    date: "2024-03-20",
+    time: "11:00",
+    status: "Cancelado",
+  },
+];
 
 const AdminCalendar = () => {
+  const { toast } = useToast();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,15 +46,8 @@ const AdminCalendar = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [appointments, setAppointments] = useState(mockAppointments);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
-
-  const {
-    appointments,
-    isLoading,
-    createAppointment,
-    updateAppointment,
-    deleteAppointment
-  } = useAppointments();
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -35,29 +56,62 @@ const AdminCalendar = () => {
     setProfessionalFilter("");
   };
 
-  const handleSaveAppointment = async (appointmentData: any) => {
-    await createAppointment.mutateAsync(appointmentData);
+  const handleSaveAppointment = (appointment: {
+    professional: string;
+    client: string;
+    date: string;
+    time: string;
+    status: string;
+    whatsapp?: string;
+    sendNotification?: boolean;
+  }) => {
+    const newAppointment = {
+      id: `APT${(appointments.length + 1).toString().padStart(3, '0')}`,
+      ...appointment
+    };
+    
+    setAppointments([...appointments, newAppointment]);
     setIsCreateDialogOpen(false);
+    
+    toast({
+      title: "Agendamento criado",
+      description: `Agendamento para ${appointment.client} criado com sucesso.`,
+    });
   };
 
-  const handleEditAppointment = async (appointmentData: any) => {
-    await updateAppointment.mutateAsync(appointmentData);
+  const handleEditAppointment = (appointment: any) => {
+    const updatedAppointments = appointments.map((app) =>
+      app.id === appointment.id ? appointment : app
+    );
+    setAppointments(updatedAppointments);
     setIsEditDialogOpen(false);
-    setSelectedAppointment(null);
+    
+    toast({
+      title: "Agendamento atualizado",
+      description: `Agendamento para ${appointment.client} atualizado com sucesso.`,
+    });
   };
 
-  const handleDeleteAppointment = async () => {
+  const handleDeleteAppointment = () => {
     if (selectedAppointment) {
-      await deleteAppointment.mutateAsync(selectedAppointment.id);
+      const updatedAppointments = appointments.filter(
+        (app) => app.id !== selectedAppointment.id
+      );
+      setAppointments(updatedAppointments);
       setIsDeleteDialogOpen(false);
       setSelectedAppointment(null);
+      
+      toast({
+        title: "Agendamento excluído",
+        description: "O agendamento foi excluído com sucesso.",
+      });
     }
   };
 
-  const filteredAppointments = appointments?.filter((appointment) => {
-    const appointmentDate = new Date(appointment.start_time);
+  const filteredAppointments = appointments.filter((appointment) => {
+    const appointmentDate = new Date(appointment.date);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesProfessional = appointment.professional.name
+    const matchesProfessional = appointment.professional
       .toLowerCase()
       .includes(professionalFilter.toLowerCase());
     const matchesDateRange =
@@ -101,17 +155,16 @@ const AdminCalendar = () => {
             />
 
             <AppointmentsTable 
-              appointments={filteredAppointments || []}
-              isLoading={isLoading}
+              appointments={filteredAppointments}
               onEdit={(id) => {
-                const appointment = appointments?.find(app => app.id === id);
+                const appointment = appointments.find(app => app.id === id);
                 if (appointment) {
                   setSelectedAppointment(appointment);
                   setIsEditDialogOpen(true);
                 }
               }}
               onDelete={(id) => {
-                const appointment = appointments?.find(app => app.id === id);
+                const appointment = appointments.find(app => app.id === id);
                 if (appointment) {
                   setSelectedAppointment(appointment);
                   setIsDeleteDialogOpen(true);
