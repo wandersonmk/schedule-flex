@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Download, Plus } from "lucide-react";
 import { FilterSection } from "./admin/FilterSection";
 import { AppointmentsTable } from "./admin/AppointmentsTable";
+import { DeleteAppointmentDialog } from "./admin/DeleteAppointmentDialog";
+import { EditAppointmentDialog } from "./admin/EditAppointmentDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const mockAppointments = [
   {
@@ -32,10 +35,15 @@ const mockAppointments = [
 ];
 
 export const AdminDashboard = () => {
+  const { toast } = useToast();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [searchTerm, setSearchTerm] = useState("");
   const [professionalFilter, setProfessionalFilter] = useState("");
+  const [appointments, setAppointments] = useState(mockAppointments);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<typeof mockAppointments[0] | null>(null);
 
   const handleExportData = () => {
     const csvContent = "data:text/csv;charset=utf-8," + 
@@ -66,16 +74,46 @@ export const AdminDashboard = () => {
   };
 
   const handleEditAppointment = (id: string) => {
-    // TODO: Implement edit appointment logic
-    console.log("Edit appointment", id);
+    const appointment = appointments.find(apt => apt.id === id);
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setEditDialogOpen(true);
+    }
   };
 
   const handleDeleteAppointment = (id: string) => {
-    // TODO: Implement delete appointment logic
-    console.log("Delete appointment", id);
+    const appointment = appointments.find(apt => apt.id === id);
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setDeleteDialogOpen(true);
+    }
   };
 
-  const filteredAppointments = mockAppointments.filter((appointment) => {
+  const handleConfirmDelete = () => {
+    if (selectedAppointment) {
+      setAppointments(appointments.filter(apt => apt.id !== selectedAppointment.id));
+      toast({
+        title: "Agendamento excluído",
+        description: `O agendamento ${selectedAppointment.id} foi excluído com sucesso.`,
+      });
+      setDeleteDialogOpen(false);
+      setSelectedAppointment(null);
+    }
+  };
+
+  const handleSaveEdit = (updatedAppointment: typeof mockAppointments[0]) => {
+    setAppointments(appointments.map(apt => 
+      apt.id === updatedAppointment.id ? updatedAppointment : apt
+    ));
+    toast({
+      title: "Agendamento atualizado",
+      description: `O agendamento ${updatedAppointment.id} foi atualizado com sucesso.`,
+    });
+    setEditDialogOpen(false);
+    setSelectedAppointment(null);
+  };
+
+  const filteredAppointments = appointments.filter((appointment) => {
     const appointmentDate = new Date(appointment.date);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesProfessional = appointment.professional
@@ -124,6 +162,19 @@ export const AdminDashboard = () => {
         appointments={filteredAppointments}
         onEdit={handleEditAppointment}
         onDelete={handleDeleteAppointment}
+      />
+
+      <DeleteAppointmentDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+      />
+
+      <EditAppointmentDialog
+        appointment={selectedAppointment}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSave={handleSaveEdit}
       />
     </div>
   );
