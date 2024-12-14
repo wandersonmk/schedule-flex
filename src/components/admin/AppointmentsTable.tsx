@@ -72,7 +72,7 @@ export const AppointmentsTable = ({ appointments, onEdit, onDelete }: Appointmen
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hover:bg-gray-50 text-gray-700 flex items-center gap-2"
+                    className="hover:bg-gray-50 text-gray-700 hover:text-gray-900 flex items-center gap-2"
                     onClick={() => openWhatsApp(appointment.whatsapp!)}
                   >
                     <MessageCircle className="h-4 w-4 text-green-600" />
