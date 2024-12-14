@@ -7,6 +7,8 @@ import { DeleteAppointmentDialog } from "./admin/DeleteAppointmentDialog";
 import { EditAppointmentDialog } from "./admin/EditAppointmentDialog";
 import { CreateAppointmentDialog } from "./admin/CreateAppointmentDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { DashboardMetrics } from "./admin/dashboard/DashboardMetrics";
+import { AppointmentsChart } from "./admin/dashboard/AppointmentsChart";
 
 const mockAppointments = [
   {
@@ -166,6 +168,9 @@ export const AdminDashboard = () => {
           </Button>
         </div>
       </div>
+
+      <DashboardMetrics />
+      <AppointmentsChart />
 
       <FilterSection
         startDate={startDate}
