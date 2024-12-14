@@ -100,7 +100,5 @@ export const CreateAppointmentDialog = ({
         </form>
       </DialogContent>
     </Dialog>
-  </DialogContent>
-</Dialog>
-);
+  );
 };
