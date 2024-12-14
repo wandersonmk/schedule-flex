@@ -19,7 +19,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import InputMask from "react-input-mask";
 
-// Lista de profissionais (pode ser movida para um arquivo separado posteriormente)
 const professionals = [
   "Dr. Silva",
   "Dra. Costa",
@@ -75,7 +74,7 @@ export const CreateAppointmentDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] w-[95vw] sm:w-full mx-auto">
         <DialogHeader>
           <DialogTitle>Novo Agendamento</DialogTitle>
         </DialogHeader>
@@ -162,8 +161,8 @@ export const CreateAppointmentDialog = ({
               </Label>
             </div>
           </div>
-          <DialogFooter>
-            <Button type="submit">Salvar</Button>
+          <DialogFooter className="sm:justify-end">
+            <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
           </DialogFooter>
         </form>
       </DialogContent>

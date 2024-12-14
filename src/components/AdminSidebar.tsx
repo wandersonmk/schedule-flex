@@ -78,7 +78,7 @@ export const AdminSidebar = () => {
                       className="flex items-center gap-3 p-3 text-primary-800 hover:text-primary-900"
                     >
                       <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                      <span className="font-medium transition-opacity duration-200">
+                      <span className="font-medium transition-opacity duration-200 whitespace-nowrap">
                         {item.title}
                       </span>
                     </Link>
