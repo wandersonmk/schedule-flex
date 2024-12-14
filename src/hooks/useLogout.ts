@@ -8,18 +8,37 @@ export const useLogout = () => {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Try to sign out normally
+      const { error } = await supabase.auth.signOut();
       
-      // Limpar qualquer dado local
-      localStorage.clear();
-      
-      // Mostrar mensagem de sucesso
+      if (error) {
+        // If we get a user_not_found error, we still want to clear local state
+        if (error.message.includes('user_not_found')) {
+          // Clear any local storage data
+          localStorage.clear();
+          
+          // Show success message anyway since we're effectively logging out
+          toast({
+            title: "Logout realizado com sucesso!",
+            description: "Você foi desconectado com sucesso.",
+          });
+          
+          // Redirect to login page
+          navigate('/login');
+          return;
+        }
+        
+        // For other errors, show error message
+        throw error;
+      }
+
+      // If successful, show success message
       toast({
         title: "Logout realizado com sucesso!",
         description: "Você foi desconectado com sucesso.",
       });
       
-      // Redirecionar para a página de login
+      // Redirect to login page
       navigate('/login');
       
     } catch (error: any) {
@@ -31,7 +50,7 @@ export const useLogout = () => {
         description: "Ocorreu um erro ao tentar desconectar. Tente novamente.",
       });
       
-      // Ainda redireciona para a página de login por segurança
+      // Still redirect to login page for safety
       navigate('/login');
     }
   };
