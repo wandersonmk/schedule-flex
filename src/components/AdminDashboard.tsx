@@ -69,7 +69,7 @@ export const AdminDashboard = () => {
   const handleExportData = () => {
     const csvContent = "data:text/csv;charset=utf-8," + 
       "ID,Profissional,Cliente,Data,Horário,Status\n" +
-      mockAppointments.map(row => 
+      filteredAppointments.map(row => 
         `${row.id},${row.professional},${row.client},${row.date},${row.time},${row.status}`
       ).join("\n");
     
@@ -81,6 +81,23 @@ export const AdminDashboard = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  const filteredAppointments = mockAppointments.filter((appointment) => {
+    const appointmentDate = new Date(appointment.date);
+    const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesProfessional = appointment.professional
+      .toLowerCase()
+      .includes(professionalFilter.toLowerCase());
+    const matchesDateRange =
+      (!startDate || appointmentDate >= startDate) &&
+      (!endDate || appointmentDate <= endDate);
+
+    return (
+      (searchTerm === "" || matchesId) &&
+      (professionalFilter === "" || matchesProfessional) &&
+      matchesDateRange
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -165,7 +182,7 @@ export const AdminDashboard = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockAppointments.map((appointment) => (
+            {filteredAppointments.map((appointment) => (
               <TableRow key={appointment.id}>
                 <TableCell>{appointment.id}</TableCell>
                 <TableCell>{appointment.professional}</TableCell>
