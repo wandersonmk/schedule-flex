@@ -9,7 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      appointments: {
+      agendamentos: {
         Row: {
           client_id: string
           created_at: string
@@ -48,29 +48,29 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "appointments_client_id_fkey"
+            foreignKeyName: "agendamentos_cliente_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "clientes"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_organization_id_fkey"
+            foreignKeyName: "agendamentos_organizacao_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "organizacoes"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "appointments_professional_id_fkey"
+            foreignKeyName: "agendamentos_profissional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
-            referencedRelation: "professionals"
+            referencedRelation: "profissionais"
             referencedColumns: ["id"]
           },
         ]
       }
-      clients: {
+      clientes: {
         Row: {
           created_at: string
           email: string | null
@@ -100,15 +100,82 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "clients_organization_id_fkey"
+            foreignKeyName: "clientes_organizacao_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "organizacoes"
             referencedColumns: ["id"]
           },
         ]
       }
-      notifications: {
+      disponibilidade_profissional: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          professional_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          professional_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          professional_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disponibilidade_profissional_profissional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profissionais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membros_organizacao: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membros_organizacao_organizacao_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
         Row: {
           created_at: string
           id: string
@@ -141,47 +208,15 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "notifications_organization_id_fkey"
+            foreignKeyName: "notificacoes_organizacao_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "organizacoes"
             referencedColumns: ["id"]
           },
         ]
       }
-      organization_members: {
-        Row: {
-          created_at: string
-          id: string
-          organization_id: string
-          role: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          organization_id: string
-          role: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          organization_id?: string
-          role?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_members_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      organizations: {
+      organizacoes: {
         Row: {
           created_at: string
           id: string
@@ -229,42 +264,7 @@ export type Database = {
         }
         Relationships: []
       }
-      professional_availability: {
-        Row: {
-          created_at: string
-          day_of_week: number
-          end_time: string
-          id: string
-          professional_id: string
-          start_time: string
-        }
-        Insert: {
-          created_at?: string
-          day_of_week: number
-          end_time: string
-          id?: string
-          professional_id: string
-          start_time: string
-        }
-        Update: {
-          created_at?: string
-          day_of_week?: number
-          end_time?: string
-          id?: string
-          professional_id?: string
-          start_time?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "professional_availability_professional_id_fkey"
-            columns: ["professional_id"]
-            isOneToOne: false
-            referencedRelation: "professionals"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      professionals: {
+      profissionais: {
         Row: {
           created_at: string
           email: string
@@ -297,10 +297,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "professionals_organization_id_fkey"
+            foreignKeyName: "profissionais_organizacao_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "organizations"
+            referencedRelation: "organizacoes"
             referencedColumns: ["id"]
           },
         ]

@@ -19,25 +19,35 @@ export const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.status === 400) {
+          throw new Error("Email ou senha incorretos");
+        }
+        throw error;
+      }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("Usuário não encontrado");
+      if (!data.user) {
+        throw new Error("Usuário não encontrado");
+      }
 
-      // Fetch user's organization
+      // Fetch user's organization with proper error handling
       const { data: orgMember, error: orgError } = await supabase
-        .from('organization_members')
+        .from('membros_organizacao')
         .select('organization_id, role')
-        .eq('user_id', user.id)
+        .eq('user_id', data.user.id)
         .single();
 
-      if (orgError) throw orgError;
+      if (orgError) {
+        if (orgError.code === 'PGRST116') {
+          throw new Error("Organização não encontrada para este usuário");
+        }
+        throw orgError;
+      }
 
       toast({
         title: "Login realizado com sucesso!",
@@ -46,9 +56,10 @@ export const LoginForm = () => {
       
       navigate("/admin");
     } catch (error: any) {
+      console.error("Erro no login:", error);
       toast({
         title: "Erro ao fazer login",
-        description: error.message,
+        description: error.message || "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
