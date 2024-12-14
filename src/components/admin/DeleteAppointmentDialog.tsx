@@ -26,7 +26,7 @@ export const DeleteAppointmentDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
           <AlertDialogDescription>
-            Tem certeza que deseja excluir este profissional? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

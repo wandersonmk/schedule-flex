@@ -7,6 +7,8 @@ import { AdminSidebar } from "@/components/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CreateAppointmentDialog } from "@/components/admin/CreateAppointmentDialog";
+import { EditAppointmentDialog } from "@/components/admin/EditAppointmentDialog";
+import { DeleteAppointmentDialog } from "@/components/admin/DeleteAppointmentDialog";
 
 const mockAppointments = [
   {
@@ -42,7 +44,10 @@ const AdminCalendar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [professionalFilter, setProfessionalFilter] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [appointments, setAppointments] = useState(mockAppointments);
+  const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -72,6 +77,35 @@ const AdminCalendar = () => {
       title: "Agendamento criado",
       description: `Agendamento para ${appointment.client} criado com sucesso.`,
     });
+  };
+
+  const handleEditAppointment = (appointment: any) => {
+    const updatedAppointments = appointments.map((app) =>
+      app.id === appointment.id ? appointment : app
+    );
+    setAppointments(updatedAppointments);
+    setIsEditDialogOpen(false);
+    
+    toast({
+      title: "Agendamento atualizado",
+      description: `Agendamento para ${appointment.client} atualizado com sucesso.`,
+    });
+  };
+
+  const handleDeleteAppointment = () => {
+    if (selectedAppointment) {
+      const updatedAppointments = appointments.filter(
+        (app) => app.id !== selectedAppointment.id
+      );
+      setAppointments(updatedAppointments);
+      setIsDeleteDialogOpen(false);
+      setSelectedAppointment(null);
+      
+      toast({
+        title: "Agendamento excluído",
+        description: "O agendamento foi excluído com sucesso.",
+      });
+    }
   };
 
   const filteredAppointments = appointments.filter((appointment) => {
@@ -123,16 +157,18 @@ const AdminCalendar = () => {
             <AppointmentsTable 
               appointments={filteredAppointments}
               onEdit={(id) => {
-                toast({
-                  title: "Editar agendamento",
-                  description: `Editando agendamento ${id}`,
-                });
+                const appointment = appointments.find(app => app.id === id);
+                if (appointment) {
+                  setSelectedAppointment(appointment);
+                  setIsEditDialogOpen(true);
+                }
               }}
               onDelete={(id) => {
-                toast({
-                  title: "Excluir agendamento",
-                  description: `Excluindo agendamento ${id}`,
-                });
+                const appointment = appointments.find(app => app.id === id);
+                if (appointment) {
+                  setSelectedAppointment(appointment);
+                  setIsDeleteDialogOpen(true);
+                }
               }}
             />
           </div>
@@ -142,6 +178,17 @@ const AdminCalendar = () => {
         open={isCreateDialogOpen} 
         onOpenChange={setIsCreateDialogOpen}
         onSave={handleSaveAppointment}
+      />
+      <EditAppointmentDialog
+        appointment={selectedAppointment}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSave={handleEditAppointment}
+      />
+      <DeleteAppointmentDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteAppointment}
       />
     </SidebarProvider>
   );
