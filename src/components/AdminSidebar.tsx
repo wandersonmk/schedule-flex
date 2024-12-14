@@ -10,7 +10,21 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Calendar, Download, Filter, List, LogOut, PanelLeftClose, PanelLeft } from "lucide-react";
+import { 
+  Calendar, 
+  Download, 
+  Filter, 
+  List, 
+  LogOut, 
+  PanelLeftClose, 
+  PanelLeft,
+  Users,
+  Settings,
+  UserCheck,
+  Bell,
+  FileText,
+  DollarSign,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const AdminSidebar = () => {
@@ -19,10 +33,10 @@ export const AdminSidebar = () => {
 
   const menuItems = [
     {
-      title: "Agendamentos",
+      title: "Dashboard",
       icon: List,
       url: "/admin",
-      tooltip: "Ver todos os agendamentos",
+      tooltip: "Visualizar dashboard",
     },
     {
       title: "Calendário",
@@ -31,10 +45,46 @@ export const AdminSidebar = () => {
       tooltip: "Visualizar calendário",
     },
     {
+      title: "Profissionais",
+      icon: UserCheck,
+      url: "/admin/professionals",
+      tooltip: "Gerenciar profissionais",
+    },
+    {
+      title: "Clientes",
+      icon: Users,
+      url: "/admin/clients",
+      tooltip: "Gerenciar clientes",
+    },
+    {
+      title: "Notificações",
+      icon: Bell,
+      url: "/admin/notifications",
+      tooltip: "Gerenciar notificações",
+    },
+    {
+      title: "Relatórios",
+      icon: FileText,
+      url: "/admin/reports",
+      tooltip: "Visualizar relatórios",
+    },
+    {
+      title: "Configurações",
+      icon: Settings,
+      url: "/admin/settings",
+      tooltip: "Configurações do sistema",
+    },
+    {
       title: "Filtros Avançados",
       icon: Filter,
       url: "/admin/filters",
       tooltip: "Aplicar filtros avançados",
+    },
+    {
+      title: "Financeiro",
+      icon: DollarSign,
+      url: "/admin/financial",
+      tooltip: "Gerenciar financeiro",
     },
     {
       title: "Exportar Dados",
@@ -68,7 +118,7 @@ export const AdminSidebar = () => {
 
           <SidebarGroup>
             <SidebarGroupLabel className="text-primary-800 font-semibold px-4 py-2">
-              Administração
+              Menu Principal
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>

@@ -18,6 +18,13 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/calendar" element={<AdminCalendar />} />
             <Route path="/admin/filters" element={<AdminFilters />} />
+            <Route path="/admin/professionals" element={<Admin />} />
+            <Route path="/admin/clients" element={<Admin />} />
+            <Route path="/admin/notifications" element={<Admin />} />
+            <Route path="/admin/reports" element={<Admin />} />
+            <Route path="/admin/settings" element={<Admin />} />
+            <Route path="/admin/financial" element={<Admin />} />
+            <Route path="/admin/export" element={<Admin />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
