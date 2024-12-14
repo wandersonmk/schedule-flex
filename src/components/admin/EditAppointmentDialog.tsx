@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,13 @@ export const EditAppointmentDialog = ({
   onOpenChange,
   onSave,
 }: EditAppointmentDialogProps) => {
-  const [formData, setFormData] = useState<Appointment | null>(appointment);
+  const [formData, setFormData] = useState<Appointment | null>(null);
+
+  useEffect(() => {
+    if (appointment) {
+      setFormData(appointment);
+    }
+  }, [appointment]);
 
   if (!formData) return null;
 
@@ -40,7 +46,6 @@ export const EditAppointmentDialog = ({
     e.preventDefault();
     if (formData) {
       onSave(formData);
-      onOpenChange(false);
     }
   };
 
