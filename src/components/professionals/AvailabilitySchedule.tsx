@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,6 +25,7 @@ interface WeeklySchedule {
 
 interface AvailabilityScheduleProps {
   onChange: (schedule: WeeklySchedule) => void;
+  initialSchedule?: WeeklySchedule;
 }
 
 const WEEK_DAYS = {
@@ -42,11 +43,15 @@ const TIME_OPTIONS = Array.from({ length: 24 }, (_, i) => {
   return `${hour}:00`;
 });
 
-export const AvailabilitySchedule = ({ onChange }: AvailabilityScheduleProps) => {
+export const AvailabilitySchedule = ({ onChange, initialSchedule }: AvailabilityScheduleProps) => {
   const [schedule, setSchedule] = useState<WeeklySchedule>(() => {
-    const initialSchedule: WeeklySchedule = {};
+    if (initialSchedule) {
+      return initialSchedule;
+    }
+
+    const defaultSchedule: WeeklySchedule = {};
     Object.keys(WEEK_DAYS).forEach((day) => {
-      initialSchedule[day] = {
+      defaultSchedule[day] = {
         enabled: false,
         timeSlots: {
           start: "08:00",
@@ -54,8 +59,14 @@ export const AvailabilitySchedule = ({ onChange }: AvailabilityScheduleProps) =>
         },
       };
     });
-    return initialSchedule;
+    return defaultSchedule;
   });
+
+  useEffect(() => {
+    if (initialSchedule) {
+      setSchedule(initialSchedule);
+    }
+  }, [initialSchedule]);
 
   const handleDayToggle = (day: string) => {
     setSchedule((prev) => {
