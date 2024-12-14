@@ -46,6 +46,21 @@ interface ProfessionalsTableProps {
   onDelete: (id: string) => void;
 }
 
+const getPeriodOfDay = (startTime: string, endTime: string): string => {
+  const startHour = parseInt(startTime.split(':')[0]);
+  const endHour = parseInt(endTime.split(':')[0]);
+
+  if (startHour >= 5 && endHour <= 12) {
+    return "Manhã";
+  } else if (startHour >= 12 && endHour <= 18) {
+    return "Tarde";
+  } else if (startHour >= 18 || endHour <= 5) {
+    return "Noite";
+  } else {
+    return "Manhã e Tarde";
+  }
+};
+
 const formatAvailability = (availability: WeeklySchedule): string => {
   const days = {
     monday: "Seg",
@@ -60,7 +75,8 @@ const formatAvailability = (availability: WeeklySchedule): string => {
   const availableDays = Object.entries(availability)
     .filter(([_, schedule]) => schedule.enabled)
     .map(([day, schedule]) => {
-      return `${days[day as keyof typeof days]} ${schedule.timeSlots.start}-${schedule.timeSlots.end}`;
+      const period = getPeriodOfDay(schedule.timeSlots.start, schedule.timeSlots.end);
+      return `${days[day as keyof typeof days]} (${period})`;
     })
     .join(", ");
 
