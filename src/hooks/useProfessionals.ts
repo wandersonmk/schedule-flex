@@ -10,10 +10,10 @@ export const useProfessionals = () => {
     queryKey: ['professionals'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('professionals')
+        .from('profissionais')
         .select(`
           *,
-          availability:professional_availability(*)
+          availability:disponibilidade_profissional(*)
         `)
         .order('name');
 
@@ -35,14 +35,14 @@ export const useProfessionals = () => {
       }[];
     }) => {
       const { data: orgData, error: orgError } = await supabase
-        .from('organization_members')
+        .from('membros_organizacao')
         .select('organization_id')
         .single();
 
       if (orgError) throw orgError;
 
       const { data: professional, error } = await supabase
-        .from('professionals')
+        .from('profissionais')
         .insert([
           {
             ...professionalData,
@@ -56,7 +56,7 @@ export const useProfessionals = () => {
 
       if (professionalData.availability && professionalData.availability.length > 0) {
         const { error: availError } = await supabase
-          .from('professional_availability')
+          .from('disponibilidade_profissional')
           .insert(
             professionalData.availability.map(avail => ({
               ...avail,
@@ -100,7 +100,7 @@ export const useProfessionals = () => {
       }[];
     }) => {
       const { error: profError } = await supabase
-        .from('professionals')
+        .from('profissionais')
         .update({
           name: data.name,
           specialty: data.specialty,
@@ -114,7 +114,7 @@ export const useProfessionals = () => {
       if (data.availability) {
         // Delete existing availability
         const { error: deleteError } = await supabase
-          .from('professional_availability')
+          .from('disponibilidade_profissional')
           .delete()
           .eq('professional_id', data.id);
 
@@ -123,7 +123,7 @@ export const useProfessionals = () => {
         // Insert new availability
         if (data.availability.length > 0) {
           const { error: availError } = await supabase
-            .from('professional_availability')
+            .from('disponibilidade_profissional')
             .insert(
               data.availability.map(avail => ({
                 ...avail,
@@ -154,7 +154,7 @@ export const useProfessionals = () => {
   const deleteProfessional = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('professionals')
+        .from('profissionais')
         .delete()
         .eq('id', id);
 

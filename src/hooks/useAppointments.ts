@@ -10,11 +10,11 @@ export const useAppointments = () => {
     queryKey: ['appointments'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('appointments')
+        .from('agendamentos')
         .select(`
           *,
-          professional:professionals(name, specialty),
-          client:clients(name, email, phone)
+          professional:profissionais(name, specialty),
+          client:clientes(name, email, phone)
         `)
         .order('start_time', { ascending: true });
 
@@ -32,14 +32,14 @@ export const useAppointments = () => {
       notes?: string;
     }) => {
       const { data: orgData, error: orgError } = await supabase
-        .from('organization_members')
+        .from('membros_organizacao')
         .select('organization_id')
         .single();
 
       if (orgError) throw orgError;
 
       const { data, error } = await supabase
-        .from('appointments')
+        .from('agendamentos')
         .insert([
           {
             ...appointmentData,
@@ -79,7 +79,7 @@ export const useAppointments = () => {
       notes?: string;
     }) => {
       const { error } = await supabase
-        .from('appointments')
+        .from('agendamentos')
         .update(data)
         .eq('id', data.id);
 
@@ -104,7 +104,7 @@ export const useAppointments = () => {
   const deleteAppointment = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('appointments')
+        .from('agendamentos')
         .delete()
         .eq('id', id);
 

@@ -10,7 +10,7 @@ export const useClients = () => {
     queryKey: ['clients'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('clients')
+        .from('clientes')
         .select('*')
         .order('name');
 
@@ -26,14 +26,14 @@ export const useClients = () => {
       phone?: string;
     }) => {
       const { data: orgData, error: orgError } = await supabase
-        .from('organization_members')
+        .from('membros_organizacao')
         .select('organization_id')
         .single();
 
       if (orgError) throw orgError;
 
       const { data, error } = await supabase
-        .from('clients')
+        .from('clientes')
         .insert([
           {
             ...clientData,
@@ -70,7 +70,7 @@ export const useClients = () => {
       phone?: string;
     }) => {
       const { error } = await supabase
-        .from('clients')
+        .from('clientes')
         .update(data)
         .eq('id', data.id);
 
@@ -95,7 +95,7 @@ export const useClients = () => {
   const deleteClient = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('clients')
+        .from('clientes')
         .delete()
         .eq('id', id);
 
