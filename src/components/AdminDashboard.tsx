@@ -1,24 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar as CalendarIcon, Download, Filter, Search } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { Download } from "lucide-react";
+import { FilterSection } from "./admin/FilterSection";
+import { AppointmentsTable } from "./admin/AppointmentsTable";
 
 const mockAppointments = [
   {
@@ -47,19 +31,6 @@ const mockAppointments = [
   },
 ];
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "Confirmado":
-      return "bg-green-100 text-green-800";
-    case "Pendente":
-      return "bg-yellow-100 text-yellow-800";
-    case "Cancelado":
-      return "bg-red-100 text-red-800";
-    default:
-      return "";
-  }
-};
-
 export const AdminDashboard = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
@@ -80,6 +51,13 @@ export const AdminDashboard = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleResetFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setSearchTerm("");
+    setProfessionalFilter("");
   };
 
   const filteredAppointments = mockAppointments.filter((appointment) => {
@@ -109,96 +87,19 @@ export const AdminDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "dd/MM/yyyy") : "Data inicial"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={setStartDate}
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+      <FilterSection
+        startDate={startDate}
+        endDate={endDate}
+        searchTerm={searchTerm}
+        professionalFilter={professionalFilter}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onSearchTermChange={setSearchTerm}
+        onProfessionalFilterChange={setProfessionalFilter}
+        onResetFilters={handleResetFilters}
+      />
 
-        <div className="flex gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "dd/MM/yyyy") : "Data final"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={setEndDate}
-                locale={ptBR}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por ID..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-
-        <div className="relative">
-          <Filter className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Filtrar por profissional..."
-            value={professionalFilter}
-            onChange={(e) => setProfessionalFilter(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Profissional</TableHead>
-              <TableHead>Cliente</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Horário</TableHead>
-              <TableHead>Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAppointments.map((appointment) => (
-              <TableRow key={appointment.id}>
-                <TableCell>{appointment.id}</TableCell>
-                <TableCell>{appointment.professional}</TableCell>
-                <TableCell>{appointment.client}</TableCell>
-                <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
-                <TableCell>{appointment.time}</TableCell>
-                <TableCell>
-                  <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(appointment.status))}>
-                    {appointment.status}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <AppointmentsTable appointments={filteredAppointments} />
     </div>
   );
 };
