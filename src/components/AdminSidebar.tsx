@@ -50,13 +50,16 @@ export const AdminSidebar = () => {
       variant="floating"
     >
       <SidebarContent className="bg-gradient-to-b from-primary-100 to-primary-200">
-        <div className="flex justify-end p-2">
-          <SidebarTrigger 
-            className="text-primary-800 hover:text-primary-900 hover:bg-white/20 transition-all duration-200 ease-in-out absolute right-2 top-2 z-50"
-          >
-            {isCollapsed ? <PanelLeft className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-          </SidebarTrigger>
-        </div>
+        <SidebarTrigger 
+          className="fixed z-50 bg-white/80 backdrop-blur-sm shadow-md rounded-lg p-2 transition-all duration-200 ease-in-out hover:bg-white hover:shadow-lg"
+          style={{
+            left: isCollapsed ? '1rem' : '14rem',
+            top: '1rem',
+          }}
+        >
+          {isCollapsed ? <PanelLeft className="h-5 w-5 text-primary-800" /> : <PanelLeftClose className="h-5 w-5 text-primary-800" />}
+        </SidebarTrigger>
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-primary-800 font-semibold px-4 py-2">
             Administração
