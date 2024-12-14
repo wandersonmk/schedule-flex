@@ -1,169 +1,67 @@
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { 
-  Calendar, 
-  Download, 
-  Filter, 
-  List, 
-  LogOut, 
-  PanelLeftClose, 
-  PanelLeft,
+  Calendar,
+  Filter,
   Users,
-  Settings,
-  UserCheck,
+  UserCircle,
   Bell,
-  FileText,
+  BarChart2,
+  Settings,
   DollarSign,
+  FileDown,
+  LogOut,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 
 export const AdminSidebar = () => {
-  const { state } = useSidebar();
-  const { handleLogout } = useLogout();
-  const isCollapsed = state === "collapsed";
+  const location = useLocation();
+  const { logout } = useLogout();
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   const menuItems = [
-    {
-      title: "Dashboard",
-      icon: List,
-      url: "/admin",
-      tooltip: "Visualizar dashboard",
-    },
-    {
-      title: "Agendamentos",
-      icon: Calendar,
-      url: "/admin/calendar",
-      tooltip: "Visualizar agendamentos",
-    },
-    {
-      title: "Profissionais",
-      icon: UserCheck,
-      url: "/admin/professionals",
-      tooltip: "Gerenciar profissionais",
-    },
-    {
-      title: "Clientes",
-      icon: Users,
-      url: "/admin/clients",
-      tooltip: "Gerenciar clientes",
-    },
-    {
-      title: "Notificações",
-      icon: Bell,
-      url: "/admin/notifications",
-      tooltip: "Gerenciar notificações",
-    },
-    {
-      title: "Relatórios",
-      icon: FileText,
-      url: "/admin/reports",
-      tooltip: "Visualizar relatórios",
-    },
-    {
-      title: "Configurações",
-      icon: Settings,
-      url: "/admin/settings",
-      tooltip: "Configurações do sistema",
-    },
-    {
-      title: "Filtros Avançados",
-      icon: Filter,
-      url: "/admin/filters",
-      tooltip: "Aplicar filtros avançados",
-    },
-    {
-      title: "Financeiro",
-      icon: DollarSign,
-      url: "/admin/financial",
-      tooltip: "Gerenciar financeiro",
-    },
-    {
-      title: "Exportar Dados",
-      icon: Download,
-      url: "/admin/export",
-      tooltip: "Exportar dados do sistema",
-    },
+    { icon: Calendar, label: "Agenda", path: "/admin/calendar" },
+    { icon: Filter, label: "Filtros", path: "/admin/filters" },
+    { icon: Users, label: "Profissionais", path: "/admin/professionals" },
+    { icon: UserCircle, label: "Clientes", path: "/admin/clients" },
+    { icon: Bell, label: "Notificações", path: "/admin/notifications" },
+    { icon: BarChart2, label: "Relatórios", path: "/admin/reports" },
+    { icon: Settings, label: "Configurações", path: "/admin/settings" },
+    { icon: DollarSign, label: "Financeiro", path: "/admin/financial" },
+    { icon: FileDown, label: "Exportar", path: "/admin/export" },
   ];
 
   return (
-    <Sidebar
-      className="shadow-lg transition-all duration-300 ease-in-out"
-      variant="floating"
-    >
-      <SidebarContent className="bg-gray-50 flex flex-col justify-between h-full">
-        <div>
-          <SidebarTrigger 
-            className="fixed z-50 bg-white/80 backdrop-blur-sm shadow-md rounded-lg p-2 transition-all duration-200 ease-in-out hover:bg-white hover:shadow-lg"
-            style={{
-              left: isCollapsed ? '1rem' : '14rem',
-              top: '1rem',
-            }}
+    <div className="h-screen w-64 bg-white border-r flex flex-col">
+      <div className="flex-1 py-6 flex flex-col gap-2">
+        {menuItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 px-6 py-2 text-gray-600 hover:bg-gray-50",
+              isActive(item.path) && "bg-gray-50 text-primary font-medium"
+            )}
           >
-            {isCollapsed ? <PanelLeft className="h-5 w-5 text-primary-800" /> : <PanelLeftClose className="h-5 w-5 text-primary-800" />}
-          </SidebarTrigger>
-
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary-800 font-semibold px-4 py-2">
-              Menu Principal
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.title} className="px-2">
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={isCollapsed ? item.tooltip : undefined}
-                      className="group transition-all duration-200 hover:bg-white active:scale-95 rounded-lg hover:shadow-md"
-                    >
-                      <Link
-                        to={item.url}
-                        className="flex items-center gap-3 p-3 text-primary-800 hover:text-primary-900"
-                      >
-                        <item.icon className="h-5 w-5 transition-transform group-hover:scale-110" />
-                        <span className="font-medium transition-opacity duration-200 whitespace-nowrap">
-                          {item.title}
-                        </span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </div>
-
-        {/* Logout Button */}
-        <div className="mt-auto px-2 pb-4">
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip={isCollapsed ? "Sair do sistema" : undefined}
-              className="group transition-all duration-200 hover:bg-red-50 active:scale-95 rounded-lg w-full"
-            >
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 p-3 text-red-600 hover:text-red-700 w-full"
-              >
-                <LogOut className="h-5 w-5 transition-transform group-hover:scale-110" />
-                <span className="font-medium transition-opacity duration-200 whitespace-nowrap">
-                  Sair
-                </span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </div>
-      </SidebarContent>
-    </Sidebar>
+            <item.icon className="h-5 w-5" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+      <div className="p-6 border-t">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-gray-600"
+          onClick={logout}
+        >
+          <LogOut className="h-5 w-5" />
+          Sair
+        </Button>
+      </div>
+    </div>
   );
 };
