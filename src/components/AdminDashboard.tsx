@@ -18,8 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
-// Dados mockados para exemplo
 const mockAppointments = [
   {
     id: "APT001",
@@ -37,7 +37,28 @@ const mockAppointments = [
     time: "10:00",
     status: "Pendente",
   },
+  {
+    id: "APT003",
+    professional: "Dr. Santos",
+    client: "Pedro Lima",
+    date: "2024-03-20",
+    time: "11:00",
+    status: "Cancelado",
+  },
 ];
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Confirmado":
+      return "bg-green-100 text-green-800";
+    case "Pendente":
+      return "bg-yellow-100 text-yellow-800";
+    case "Cancelado":
+      return "bg-red-100 text-red-800";
+    default:
+      return "";
+  }
+};
 
 export const AdminDashboard = () => {
   const [startDate, setStartDate] = useState<Date>();
@@ -151,7 +172,11 @@ export const AdminDashboard = () => {
                 <TableCell>{appointment.client}</TableCell>
                 <TableCell>{format(new Date(appointment.date), "dd/MM/yyyy")}</TableCell>
                 <TableCell>{appointment.time}</TableCell>
-                <TableCell>{appointment.status}</TableCell>
+                <TableCell>
+                  <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(appointment.status))}>
+                    {appointment.status}
+                  </span>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

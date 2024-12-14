@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { Header } from "@/components/Header";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AdminSidebar } from "@/components/AdminSidebar";
 import { AdminDashboard } from "@/components/AdminDashboard";
 
 const Admin = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="container mx-auto px-6 py-8">
-        <AdminDashboard />
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AdminSidebar />
+        <main className="flex-1 p-8 bg-gray-50">
+          <AdminDashboard />
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
