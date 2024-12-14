@@ -8,6 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { DeleteAppointmentDialog } from "../admin/DeleteAppointmentDialog";
 
 interface Professional {
   id: string;
@@ -28,6 +30,22 @@ export const ProfessionalsTable = ({
   onEdit,
   onDelete,
 }: ProfessionalsTableProps) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedProfessionalId(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedProfessionalId) {
+      onDelete(selectedProfessionalId);
+      setDeleteDialogOpen(false);
+      setSelectedProfessionalId(null);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow">
       <Table>
@@ -60,7 +78,7 @@ export const ProfessionalsTable = ({
                     variant="outline"
                     size="icon"
                     className="text-red-600 hover:text-red-700"
-                    onClick={() => onDelete(professional.id)}
+                    onClick={() => handleDeleteClick(professional.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -70,6 +88,12 @@ export const ProfessionalsTable = ({
           ))}
         </TableBody>
       </Table>
+
+      <DeleteAppointmentDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };
