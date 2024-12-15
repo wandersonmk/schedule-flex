@@ -64,6 +64,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
           description: "Você será redirecionado para o painel.",
         });
         navigate("/admin");
+        return; // Adicionado return para evitar execução adicional
       } else {
         throw new Error("Erro ao configurar organização");
       }
