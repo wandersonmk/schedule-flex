@@ -21,8 +21,8 @@ export const useProfessionals = () => {
     } catch (error: any) {
       console.error('Error fetching professionals:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to load professionals",
+        title: "Erro",
+        description: error.message || "Falha ao carregar profissionais",
         variant: "destructive",
       });
     } finally {
@@ -35,14 +35,14 @@ export const useProfessionals = () => {
       await addProfessionalToApi(newProfessional);
       await fetchProfessionals();
       toast({
-        title: "Success",
-        description: "Professional added successfully",
+        title: "Sucesso",
+        description: "Profissional adicionado com sucesso",
       });
     } catch (error: any) {
       console.error('Error adding professional:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to add professional",
+        title: "Erro",
+        description: error.message || "Falha ao adicionar profissional",
         variant: "destructive",
       });
       throw error;
@@ -54,14 +54,14 @@ export const useProfessionals = () => {
       await updateProfessionalInApi(updatedProfessional);
       await fetchProfessionals();
       toast({
-        title: "Success",
-        description: "Professional updated successfully",
+        title: "Sucesso",
+        description: "Profissional atualizado com sucesso",
       });
     } catch (error: any) {
       console.error('Error updating professional:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update professional",
+        title: "Erro",
+        description: error.message || "Falha ao atualizar profissional",
         variant: "destructive",
       });
       throw error;
@@ -73,14 +73,14 @@ export const useProfessionals = () => {
       await deleteProfessionalFromApi(id);
       await fetchProfessionals();
       toast({
-        title: "Success",
-        description: "Professional removed successfully",
+        title: "Sucesso",
+        description: "Profissional removido com sucesso",
       });
     } catch (error: any) {
       console.error('Error deleting professional:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete professional",
+        title: "Erro",
+        description: error.message || "Falha ao remover profissional",
         variant: "destructive",
       });
       throw error;
