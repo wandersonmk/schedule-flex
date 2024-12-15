@@ -38,13 +38,14 @@ const Index = () => {
           if (orgMember) {
             console.log("Organization member found, redirecting to admin...");
             navigate("/admin");
+            return;
           }
         }
       } catch (error) {
         console.error("Error in checkSession:", error);
-      } finally {
-        setIsLoading(false);
       }
+      
+      setIsLoading(false);
     };
 
     checkSession();
