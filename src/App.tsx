@@ -44,7 +44,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -56,8 +56,8 @@ function App() {
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Index />} />
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route
               path="/admin"
               element={

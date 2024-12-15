@@ -5,71 +5,37 @@ import { LoginSection } from "@/components/auth/LoginSection";
 
 const Index = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
-      try {
-        console.log("Checking session...");
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error checking session:", error);
-          setIsLoading(false);
-          return;
-        }
-
-        if (session) {
-          console.log("Session found, checking organization membership...");
-          const { data: orgMember, error: orgError } = await supabase
-            .from('organization_members')
-            .select('organization_id, role')
-            .eq('user_id', session.user.id)
-            .single();
-
-          if (orgError) {
-            console.error("Error checking organization:", orgError);
-            setIsLoading(false);
-            return;
-          }
-
-          if (orgMember) {
-            console.log("Organization member found, redirecting to admin...");
-            navigate("/admin");
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Error in checkSession:", error);
-      }
+      const { data: { session } } = await supabase.auth.getSession();
       
-      setIsLoading(false);
+      if (session) {
+        const { data: orgMember } = await supabase
+          .from('organization_members')
+          .select('organization_id, role')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (orgMember) {
+          navigate("/admin");
+        }
+      }
     };
 
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
-      
       if (event === 'SIGNED_IN' && session) {
-        try {
-          const { data: orgMember, error } = await supabase
-            .from('organization_members')
-            .select('organization_id, role')
-            .eq('user_id', session.user.id)
-            .single();
+        const { data: orgMember } = await supabase
+          .from('organization_members')
+          .select('organization_id, role')
+          .eq('user_id', session.user.id)
+          .single();
 
-          if (error) {
-            console.error("Error checking organization membership:", error);
-            return;
-          }
-
-          if (orgMember) {
-            navigate("/admin");
-          }
-        } catch (error) {
-          console.error("Error checking organization membership:", error);
+        if (orgMember) {
+          navigate("/admin");
         }
       }
     });
@@ -78,14 +44,6 @@ const Index = () => {
       subscription.unsubscribe();
     };
   }, [navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex">
