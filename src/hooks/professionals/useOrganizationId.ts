@@ -1,35 +1,52 @@
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export const useOrganizationId = async () => {
-  const { data: user } = await supa
+export const useOrganizationId = () => {
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-Let's now implement the code changes to fix the professional management functionality. I notice that the `useProfessionals` hook is quite large, so I'll refactor it into smaller, more focused files while maintaining the exact same functionality.
+  useEffect(() => {
+    const fetchOrganizationId = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          setError('Usuário não autenticado');
+          setLoading(false);
+          return;
+        }
 
-<lov-code>
-First, let's create separate files for different concerns:
+        const { data: orgMember, error: orgError } = await supabase
+          .from('organization_members')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .single();
 
-<lov-write file_path="src/types/professional.ts">
-export interface TimeSlot {
-  start: string;
-  end: string;
-}
+        if (orgError) {
+          console.error('Erro ao buscar organização:', orgError);
+          setError('Erro ao buscar organização');
+          setLoading(false);
+          return;
+        }
 
-export interface DaySchedule {
-  enabled: boolean;
-  timeSlots: TimeSlot;
-}
+        if (!orgMember) {
+          setError('Usuário não pertence a nenhuma organização');
+          setLoading(false);
+          return;
+        }
 
-export interface WeeklySchedule {
-  [key: string]: DaySchedule;
-}
+        setOrganizationId(orgMember.organization_id);
+        setLoading(false);
+      } catch (err) {
+        console.error('Erro ao buscar ID da organização:', err);
+        setError('Erro ao buscar ID da organização');
+        setLoading(false);
+      }
+    };
 
-export interface Professional {
-  id: string;
-  name: string;
-  specialty: string;
-  email: string;
-  phone: string;
-  availability: WeeklySchedule;
-}
+    fetchOrganizationId();
+  }, []);
 
-export type NewProfessional = Omit<Professional, "id">;
+  return { organizationId, loading, error };
+};
