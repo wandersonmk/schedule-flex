@@ -10,19 +10,23 @@ import {
 
 export const useProfessionals = () => {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const fetchProfessionals = async () => {
     try {
+      setLoading(true);
       const data = await fetchProfessionalsFromApi();
       setProfessionals(data);
     } catch (error) {
       console.error('Erro ao buscar profissionais:', error);
       toast({
         title: "Erro",
-        description: "Erro ao buscar profissionais",
+        description: "Não foi possível carregar os profissionais. Por favor, tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,9 +42,10 @@ export const useProfessionals = () => {
       console.error('Erro ao adicionar profissional:', error);
       toast({
         title: "Erro",
-        description: "Erro ao adicionar profissional",
+        description: "Não foi possível adicionar o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
@@ -56,9 +61,10 @@ export const useProfessionals = () => {
       console.error('Erro ao atualizar profissional:', error);
       toast({
         title: "Erro",
-        description: "Erro ao atualizar profissional",
+        description: "Não foi possível atualizar o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
@@ -74,14 +80,16 @@ export const useProfessionals = () => {
       console.error('Erro ao deletar profissional:', error);
       toast({
         title: "Erro",
-        description: "Erro ao deletar profissional",
+        description: "Não foi possível remover o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
   return {
     professionals,
+    loading,
     fetchProfessionals,
     addProfessional,
     updateProfessional,

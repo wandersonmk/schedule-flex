@@ -3,53 +3,61 @@ import type { Professional, NewProfessional } from '@/types/professional';
 
 export const fetchProfessionalsFromApi = async () => {
   try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) return [];
-
-    // Buscar diretamente o organization_id do usuário autenticado
-    const { data: orgMember, error: orgError } = await supabase
-      .from('organization_members')
-      .select('organization_id')
-      .eq('user_id', user.user.id)
-      .single();
-
-    if (orgError || !orgMember) {
-      console.error('Erro ao buscar organização:', orgError);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('Usuário não autenticado');
       return [];
     }
 
-    const { data, error } = await supabase
+    // Primeiro, buscar a organization_id do usuário
+    const { data: orgMember, error: orgError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (orgError) {
+      console.error('Erro ao buscar organização:', orgError);
+      throw orgError;
+    }
+
+    if (!orgMember) {
+      console.error('Usuário não pertence a nenhuma organização');
+      return [];
+    }
+
+    // Depois, buscar os profissionais da organização
+    const { data: professionals, error: profError } = await supabase
       .from('professionals')
       .select('*')
       .eq('organization_id', orgMember.organization_id);
 
-    if (error) {
-      console.error('Erro ao buscar profissionais:', error);
-      return [];
+    if (profError) {
+      console.error('Erro ao buscar profissionais:', profError);
+      throw profError;
     }
 
-    return data.map(prof => ({
+    return professionals.map(prof => ({
       ...prof,
-      availability: {}
+      availability: {} // Inicializa availability como objeto vazio
     }));
   } catch (error) {
     console.error('Erro ao buscar profissionais:', error);
-    return [];
+    throw error;
   }
 };
 
 export const addProfessionalToApi = async (newProfessional: NewProfessional) => {
   try {
-    const { data: user } = await supabase.auth.getUser();
-    if (!user.user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       throw new Error('Usuário não autenticado');
     }
 
-    // Buscar diretamente o organization_id do usuário autenticado
     const { data: orgMember, error: orgError } = await supabase
       .from('organization_members')
       .select('organization_id')
-      .eq('user_id', user.user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (orgError || !orgMember) {
