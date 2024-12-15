@@ -11,6 +11,7 @@ import {
   DollarSign,
   FileDown,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
@@ -24,6 +25,7 @@ export const AdminSidebar = () => {
   };
 
   const menuItems = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
     { icon: Calendar, label: "Agenda", path: "/admin/calendar" },
     { icon: Filter, label: "Filtros", path: "/admin/filters" },
     { icon: Users, label: "Profissionais", path: "/admin/professionals" },
