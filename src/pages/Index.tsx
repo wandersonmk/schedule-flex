@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
 import { LoginSection } from "@/components/auth/LoginSection";
 
 const Index = () => {
@@ -89,18 +88,15 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <div className="flex-1 flex">
-        <LoginSection isLogin={isLogin} setIsLogin={setIsLogin} />
-        <div className="hidden md:block md:w-1/2 bg-[#9b87f5] bg-opacity-10">
-          <div className="h-full w-full">
-            <img 
-              src="/lovable-uploads/c8bd5cfb-389e-42cd-bcb8-ce6d6b5cf359.png" 
-              alt="Medical Team" 
-              className="w-full h-full object-cover"
-            />
-          </div>
+    <div className="min-h-screen flex">
+      <LoginSection isLogin={isLogin} setIsLogin={setIsLogin} />
+      <div className="hidden md:block md:w-1/2 bg-[#9b87f5] bg-opacity-10">
+        <div className="h-full w-full">
+          <img 
+            src="/lovable-uploads/c8bd5cfb-389e-42cd-bcb8-ce6d6b5cf359.png" 
+            alt="Medical Team" 
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
     </div>
