@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { SignupFormFields } from "./SignupFormFields";
+import { createAccount, checkOrganizationMembership } from "@/utils/auth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,62 +47,38 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
     }
 
     try {
-      const { error: signUpError, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            nome_empresa: nomeEmpresa,
-            nome_usuario: nomeUsuario,
-          },
-        },
-      });
-
-      if (signUpError) {
-        if (signUpError.message === "User already registered") {
-          setShowUserExistsDialog(true);
-          setIsLoading(false);
-          return;
-        }
-        throw signUpError;
+      const { user } = await createAccount(email, password, nomeEmpresa, nomeUsuario);
+      
+      if (!user) {
+        throw new Error("Erro ao criar usuário");
       }
 
       // Aguardar um momento para garantir que os triggers do Supabase foram executados
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Verificar se o usuário foi criado e tem uma organização
-      const { data: session } = await supabase.auth.getSession();
-      
-      if (session?.session?.user) {
-        const { data: orgMember, error: orgError } = await supabase
-          .from('organization_members')
-          .select('organization_id, role')
-          .eq('user_id', session.session.user.id)
-          .single();
+      const orgMember = await checkOrganizationMembership(user.id);
 
-        if (orgMember) {
-          toast({
-            title: "Conta criada com sucesso!",
-            description: "Você será redirecionado para o painel.",
-          });
-          navigate("/admin");
-        } else {
-          console.error("Erro ao verificar organização:", orgError);
-          toast({
-            title: "Erro ao configurar conta",
-            description: "Por favor, tente novamente ou contate o suporte.",
-            variant: "destructive",
-          });
-        }
+      if (orgMember) {
+        toast({
+          title: "Conta criada com sucesso!",
+          description: "Você será redirecionado para o painel.",
+        });
+        navigate("/admin");
+      } else {
+        throw new Error("Erro ao configurar organização");
       }
-      
     } catch (error: any) {
       console.error("Erro ao criar conta:", error);
-      toast({
-        title: "Erro ao criar conta",
-        description: error.message,
-        variant: "destructive",
-      });
+      
+      if (error.message === "User already registered") {
+        setShowUserExistsDialog(true);
+      } else {
+        toast({
+          title: "Erro ao criar conta",
+          description: error.message || "Ocorreu um erro ao tentar criar sua conta. Por favor, tente novamente.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -112,76 +87,23 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   return (
     <>
       <form onSubmit={handleCreateAccount} className="space-y-6">
-        <div className="space-y-4">
-          <Input
-            type="text"
-            placeholder="Nome da sua empresa"
-            value={nomeEmpresa}
-            onChange={(e) => setNomeEmpresa(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <Input
-            type="text"
-            placeholder="Digite o seu nome"
-            value={nomeUsuario}
-            onChange={(e) => setNomeUsuario(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-          <div className="relative">
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              disabled={isLoading}
-            >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-          <div className="relative">
-            <Input
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirme sua senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              disabled={isLoading}
-            >
-              {showConfirmPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
-            </button>
-          </div>
-        </div>
+        <SignupFormFields
+          nomeEmpresa={nomeEmpresa}
+          setNomeEmpresa={setNomeEmpresa}
+          nomeUsuario={nomeUsuario}
+          setNomeUsuario={setNomeUsuario}
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          confirmPassword={confirmPassword}
+          setConfirmPassword={setConfirmPassword}
+          showPassword={showPassword}
+          setShowPassword={setShowPassword}
+          showConfirmPassword={showConfirmPassword}
+          setShowConfirmPassword={setShowConfirmPassword}
+          isLoading={isLoading}
+        />
 
         <Button
           type="submit"
