@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,17 +62,43 @@ export const SignupForm = ({ setIsLogin }: SignupFormProps) => {
       if (signUpError) {
         if (signUpError.message === "User already registered") {
           setShowUserExistsDialog(true);
+          setIsLoading(false);
           return;
         }
         throw signUpError;
       }
 
-      toast({
-        title: "Conta criada com sucesso!",
-        description: "Você será redirecionado para o painel.",
-      });
+      // Aguardar um momento para garantir que os triggers do Supabase foram executados
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Verificar se o usuário foi criado e tem uma organização
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (session?.session?.user) {
+        const { data: orgMember, error: orgError } = await supabase
+          .from('organization_members')
+          .select('organization_id, role')
+          .eq('user_id', session.session.user.id)
+          .single();
+
+        if (orgMember) {
+          toast({
+            title: "Conta criada com sucesso!",
+            description: "Você será redirecionado para o painel.",
+          });
+          navigate("/admin");
+        } else {
+          console.error("Erro ao verificar organização:", orgError);
+          toast({
+            title: "Erro ao configurar conta",
+            description: "Por favor, tente novamente ou contate o suporte.",
+            variant: "destructive",
+          });
+        }
+      }
       
     } catch (error: any) {
+      console.error("Erro ao criar conta:", error);
       toast({
         title: "Erro ao criar conta",
         description: error.message,

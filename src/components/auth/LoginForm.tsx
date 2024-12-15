@@ -37,7 +37,7 @@ export const LoginForm = () => {
 
       // Fetch user's organization with proper error handling
       const { data: orgMember, error: orgError } = await supabase
-        .from('organization_members') // Changed from 'membros_organizacao' to 'organization_members'
+        .from('organization_members')
         .select('organization_id, role')
         .eq('user_id', data.user.id)
         .single();
