@@ -35,15 +35,21 @@ const Index = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session);
+      
       if (event === 'SIGNED_IN' && session) {
-        const { data: orgMember } = await supabase
-          .from('organization_members')
-          .select('organization_id, role')
-          .eq('user_id', session.user.id)
-          .single();
+        try {
+          const { data: orgMember } = await supabase
+            .from('organization_members')
+            .select('organization_id, role')
+            .eq('user_id', session.user.id)
+            .single();
 
-        if (orgMember) {
-          navigate("/admin");
+          if (orgMember) {
+            navigate("/admin");
+          }
+        } catch (error) {
+          console.error("Error checking organization membership:", error);
         }
       }
     });
@@ -63,10 +69,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-8">
         <div className="max-w-md w-full space-y-8">
-          {/* Logo */}
           <div className="flex justify-center mb-8">
             <img 
               src="/lovable-uploads/62034df4-f2bf-49e0-93fa-1bcdc61cf498.png" 
@@ -77,7 +81,6 @@ const Index = () => {
 
           <AuthTabs isLogin={isLogin} setIsLogin={setIsLogin} />
 
-          {/* Info text */}
           <p className="text-gray-600 text-sm text-center">
             {isLogin 
               ? "Preencha os campos com seu e-mail e senha."
@@ -85,7 +88,6 @@ const Index = () => {
             }
           </p>
 
-          {/* Forms */}
           {isLogin ? (
             <LoginForm />
           ) : (
@@ -94,7 +96,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Right side - Image */}
       <div className="hidden md:block md:w-1/2 bg-[#9b87f5] bg-opacity-10">
         <div className="h-full w-full">
           <img 

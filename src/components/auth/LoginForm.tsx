@@ -3,7 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { loginWithEmail } from "@/utils/auth";
 import { useNavigate } from "react-router-dom";
 
 export const LoginForm = () => {
@@ -19,34 +19,10 @@ export const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { user } = await loginWithEmail(email, password);
 
-      if (error) {
-        if (error.status === 400) {
-          throw new Error("Email ou senha incorretos");
-        }
-        throw error;
-      }
-
-      if (!data.user) {
+      if (!user) {
         throw new Error("Usuário não encontrado");
-      }
-
-      // Fetch user's organization with proper error handling
-      const { data: orgMember, error: orgError } = await supabase
-        .from('organization_members')
-        .select('organization_id, role')
-        .eq('user_id', data.user.id)
-        .single();
-
-      if (orgError) {
-        if (orgError.code === 'PGRST116') {
-          throw new Error("Organização não encontrada para este usuário");
-        }
-        throw orgError;
       }
 
       toast({
@@ -59,7 +35,9 @@ export const LoginForm = () => {
       console.error("Erro no login:", error);
       toast({
         title: "Erro ao fazer login",
-        description: error.message || "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.",
+        description: error.message === "Invalid login credentials"
+          ? "Email ou senha incorretos"
+          : "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
