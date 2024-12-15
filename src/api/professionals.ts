@@ -1,6 +1,34 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Professional, NewProfessional } from '@/types/professional';
 
+const mapAvailabilityToWeeklySchedule = (availability: any[]) => {
+  const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const schedule: any = {};
+
+  weekDays.forEach(day => {
+    schedule[day] = {
+      enabled: false,
+      timeSlots: {
+        start: '08:00',
+        end: '18:00'
+      }
+    };
+  });
+
+  availability.forEach(slot => {
+    const day = weekDays[slot.day_of_week];
+    schedule[day] = {
+      enabled: true,
+      timeSlots: {
+        start: slot.start_time,
+        end: slot.end_time
+      }
+    };
+  });
+
+  return schedule;
+};
+
 export const fetchProfessionalsFromApi = async () => {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   
@@ -30,10 +58,27 @@ export const fetchProfessionalsFromApi = async () => {
     throw new Error('Failed to fetch professionals');
   }
 
-  return professionals.map(prof => ({
-    ...prof,
-    availability: {}
-  }));
+  // Fetch availability for each professional
+  const professionalsWithAvailability = await Promise.all(
+    professionals.map(async (prof) => {
+      const { data: availability, error: availError } = await supabase
+        .from('professional_availability')
+        .select('*')
+        .eq('professional_id', prof.id);
+
+      if (availError) {
+        console.error('Error fetching availability:', availError);
+        return { ...prof, availability: {} };
+      }
+
+      return {
+        ...prof,
+        availability: mapAvailabilityToWeeklySchedule(availability || [])
+      };
+    })
+  );
+
+  return professionalsWithAvailability;
 };
 
 export const addProfessionalToApi = async (newProfessional: NewProfessional) => {

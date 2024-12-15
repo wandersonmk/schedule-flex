@@ -6,29 +6,8 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { AvailabilitySchedule } from "./AvailabilitySchedule";
-
-interface TimeSlot {
-  start: string;
-  end: string;
-}
-
-interface DaySchedule {
-  enabled: boolean;
-  timeSlots: TimeSlot;
-}
-
-interface WeeklySchedule {
-  [key: string]: DaySchedule;
-}
-
-interface Professional {
-  id: string;
-  name: string;
-  specialty: string;
-  email: string;
-  phone: string;
-  availability: WeeklySchedule;
-}
+import { supabase } from "@/integrations/supabase/client";
+import type { Professional } from "@/types/professional";
 
 interface EditProfessionalModalProps {
   open: boolean;
@@ -48,9 +27,10 @@ export const EditProfessionalModal = ({
     specialty: "",
     email: "",
     phone: "",
-    availability: {} as WeeklySchedule,
+    availability: {},
   });
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (professional) {
@@ -58,7 +38,7 @@ export const EditProfessionalModal = ({
         name: professional.name,
         specialty: professional.specialty,
         email: professional.email,
-        phone: professional.phone,
+        phone: professional.phone || "",
         availability: professional.availability,
       });
     }
@@ -72,26 +52,99 @@ export const EditProfessionalModal = ({
     }));
   };
 
-  const handleAvailabilityChange = (schedule: WeeklySchedule) => {
+  const handleAvailabilityChange = (schedule: any) => {
     setFormData((prev) => ({
       ...prev,
       availability: schedule,
     }));
   };
 
-  const handleUpdateProfessional = (e: React.FormEvent) => {
+  const handleUpdateProfessional = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!professional) return;
 
-    onUpdate({
-      ...professional,
-      ...formData,
-    });
-    onOpenChange(false);
-    toast({
-      title: "Profissional atualizado",
-      description: "As informações foram atualizadas com sucesso.",
-    });
+    try {
+      setIsSubmitting(true);
+
+      // Update professional in database
+      const { error: updateError } = await supabase
+        .from('professionals')
+        .update({
+          name: formData.name,
+          specialty: formData.specialty,
+          email: formData.email,
+          phone: formData.phone,
+        })
+        .eq('id', professional.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update professional availability
+      const { error: availabilityError } = await supabase
+        .from('professional_availability')
+        .delete()
+        .eq('professional_id', professional.id);
+
+      if (availabilityError) {
+        throw availabilityError;
+      }
+
+      // Insert new availability records
+      const availabilityRecords = Object.entries(formData.availability)
+        .filter(([_, schedule]) => schedule.enabled)
+        .map(([day, schedule]) => ({
+          professional_id: professional.id,
+          day_of_week: getDayNumber(day),
+          start_time: schedule.timeSlots.start,
+          end_time: schedule.timeSlots.end,
+        }));
+
+      if (availabilityRecords.length > 0) {
+        const { error: insertError } = await supabase
+          .from('professional_availability')
+          .insert(availabilityRecords);
+
+        if (insertError) {
+          throw insertError;
+        }
+      }
+
+      // Call onUpdate with updated professional data
+      onUpdate({
+        ...professional,
+        ...formData,
+      });
+
+      onOpenChange(false);
+      toast({
+        title: "Profissional atualizado",
+        description: "As informações foram atualizadas com sucesso.",
+      });
+    } catch (error: any) {
+      console.error('Error updating professional:', error);
+      toast({
+        title: "Erro ao atualizar",
+        description: "Ocorreu um erro ao atualizar o profissional.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const getDayNumber = (day: string): number => {
+    const days = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+    };
+    return days[day as keyof typeof days];
   };
 
   return (
@@ -156,8 +209,8 @@ export const EditProfessionalModal = ({
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Atualizar
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Atualizando..." : "Atualizar"}
             </Button>
           </form>
         </ScrollArea>
