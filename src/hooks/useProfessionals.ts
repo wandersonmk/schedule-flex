@@ -18,11 +18,11 @@ export const useProfessionals = () => {
       setLoading(true);
       const data = await fetchProfessionalsFromApi();
       setProfessionals(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao buscar profissionais:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os profissionais. Por favor, tente novamente.",
+        description: error.message || "Não foi possível carregar os profissionais. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -38,11 +38,11 @@ export const useProfessionals = () => {
         title: "Sucesso",
         description: "Profissional adicionado com sucesso",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao adicionar profissional:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível adicionar o profissional. Por favor, tente novamente.",
+        description: error.message || "Não foi possível adicionar o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
       throw error;
@@ -57,11 +57,11 @@ export const useProfessionals = () => {
         title: "Sucesso",
         description: "Profissional atualizado com sucesso",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao atualizar profissional:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o profissional. Por favor, tente novamente.",
+        description: error.message || "Não foi possível atualizar o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
       throw error;
@@ -76,11 +76,11 @@ export const useProfessionals = () => {
         title: "Sucesso",
         description: "Profissional removido com sucesso",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao deletar profissional:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível remover o profissional. Por favor, tente novamente.",
+        description: error.message || "Não foi possível remover o profissional. Por favor, tente novamente.",
         variant: "destructive",
       });
       throw error;
