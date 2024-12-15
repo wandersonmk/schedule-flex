@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AddProfessionalModal } from "@/components/professionals/AddProfessionalModal";
 import { ProfessionalsTable } from "@/components/professionals/ProfessionalsTable";
 import { EditProfessionalModal } from "@/components/professionals/EditProfessionalModal";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 
 interface TimeSlot {
   start: string;
@@ -30,76 +32,123 @@ interface Professional {
 }
 
 const AdminProfessionals = () => {
-  const [professionals, setProfessionals] = useState<Professional[]>([
-    {
-      id: "1",
-      name: "Dr. João Silva",
-      specialty: "Clínico Geral",
-      email: "joao.silva@exemplo.com",
-      phone: "(11) 99999-9999",
-      availability: {
-        monday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        tuesday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        wednesday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        thursday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        friday: {
-          enabled: true,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        saturday: {
-          enabled: false,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-        sunday: {
-          enabled: false,
-          timeSlots: {
-            start: "08:00",
-            end: "18:00",
-          },
-        },
-      },
-    },
-  ]);
-
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
+  const { toast } = useToast();
 
-  const handleAddProfessional = (newProfessional: Omit<Professional, "id">) => {
-    const professional = {
-      id: Date.now().toString(),
-      ...newProfessional,
-    };
-    setProfessionals((prev) => [...prev, professional]);
+  const fetchProfessionals = async () => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      // Primeiro, buscar a organização do usuário
+      const { data: orgMember } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.user.id)
+        .single();
+
+      if (!orgMember) {
+        console.error('Usuário não pertence a nenhuma organização');
+        return;
+      }
+
+      // Agora buscar os profissionais da organização
+      const { data, error } = await supabase
+        .from('professionals')
+        .select('*')
+        .eq('organization_id', orgMember.organization_id);
+
+      if (error) {
+        console.error('Erro ao buscar profissionais:', error);
+        return;
+      }
+
+      // Converter os dados do banco para o formato esperado pelo componente
+      const formattedProfessionals = data.map(prof => ({
+        ...prof,
+        availability: {} // Inicialmente vazio, você pode implementar a busca da disponibilidade depois
+      }));
+
+      setProfessionals(formattedProfessionals);
+    } catch (error) {
+      console.error('Erro ao buscar profissionais:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfessionals();
+  }, []);
+
+  const handleAddProfessional = async (newProfessional: Omit<Professional, "id">) => {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        toast({
+          title: "Erro",
+          description: "Usuário não autenticado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Buscar a organização do usuário
+      const { data: orgMember } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.user.id)
+        .single();
+
+      if (!orgMember) {
+        toast({
+          title: "Erro",
+          description: "Usuário não pertence a nenhuma organização",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Inserir o novo profissional
+      const { data, error } = await supabase
+        .from('professionals')
+        .insert([
+          {
+            name: newProfessional.name,
+            specialty: newProfessional.specialty,
+            email: newProfessional.email,
+            phone: newProfessional.phone,
+            organization_id: orgMember.organization_id
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao adicionar profissional:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao adicionar profissional",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Atualizar a lista de profissionais
+      await fetchProfessionals();
+
+      toast({
+        title: "Sucesso",
+        description: "Profissional adicionado com sucesso",
+      });
+    } catch (error) {
+      console.error('Erro ao adicionar profissional:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar profissional",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEditProfessional = (professional: Professional) => {
@@ -107,16 +156,73 @@ const AdminProfessionals = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleUpdateProfessional = (updatedProfessional: Professional) => {
-    setProfessionals((prev) =>
-      prev.map((p) =>
-        p.id === updatedProfessional.id ? updatedProfessional : p
-      )
-    );
+  const handleUpdateProfessional = async (updatedProfessional: Professional) => {
+    try {
+      const { error } = await supabase
+        .from('professionals')
+        .update({
+          name: updatedProfessional.name,
+          specialty: updatedProfessional.specialty,
+          email: updatedProfessional.email,
+          phone: updatedProfessional.phone,
+        })
+        .eq('id', updatedProfessional.id);
+
+      if (error) {
+        console.error('Erro ao atualizar profissional:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao atualizar profissional",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await fetchProfessionals();
+      toast({
+        title: "Sucesso",
+        description: "Profissional atualizado com sucesso",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar profissional:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar profissional",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteProfessional = (id: string) => {
-    setProfessionals((prev) => prev.filter((p) => p.id !== id));
+  const handleDeleteProfessional = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('professionals')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Erro ao deletar profissional:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao deletar profissional",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await fetchProfessionals();
+      toast({
+        title: "Sucesso",
+        description: "Profissional removido com sucesso",
+      });
+    } catch (error) {
+      console.error('Erro ao deletar profissional:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao deletar profissional",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
