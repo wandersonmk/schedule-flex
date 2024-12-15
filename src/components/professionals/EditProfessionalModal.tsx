@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { AvailabilitySchedule } from "./AvailabilitySchedule";
+import { ProfessionalFormFields } from "./ProfessionalFormFields";
 import { supabase } from "@/integrations/supabase/client";
 import type { Professional } from "@/types/professional";
+import type { WeeklySchedule } from "@/types/availability";
 
 interface EditProfessionalModalProps {
   open: boolean;
@@ -16,13 +16,21 @@ interface EditProfessionalModalProps {
   onUpdate: (professional: Professional) => void;
 }
 
+interface FormData {
+  name: string;
+  specialty: string;
+  email: string;
+  phone: string;
+  availability: WeeklySchedule;
+}
+
 export const EditProfessionalModal = ({
   open,
   onOpenChange,
   professional,
   onUpdate,
 }: EditProfessionalModalProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     specialty: "",
     email: "",
@@ -52,11 +60,24 @@ export const EditProfessionalModal = ({
     }));
   };
 
-  const handleAvailabilityChange = (schedule: any) => {
+  const handleAvailabilityChange = (schedule: WeeklySchedule) => {
     setFormData((prev) => ({
       ...prev,
       availability: schedule,
     }));
+  };
+
+  const getDayNumber = (day: string): number => {
+    const days: { [key: string]: number } = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+    };
+    return days[day];
   };
 
   const handleUpdateProfessional = async (e: React.FormEvent) => {
@@ -111,7 +132,6 @@ export const EditProfessionalModal = ({
         }
       }
 
-      // Call onUpdate with updated professional data
       onUpdate({
         ...professional,
         ...formData,
@@ -134,19 +154,6 @@ export const EditProfessionalModal = ({
     }
   };
 
-  const getDayNumber = (day: string): number => {
-    const days = {
-      sunday: 0,
-      monday: 1,
-      tuesday: 2,
-      wednesday: 3,
-      thursday: 4,
-      friday: 5,
-      saturday: 6,
-    };
-    return days[day as keyof typeof days];
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -158,49 +165,10 @@ export const EditProfessionalModal = ({
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           <form onSubmit={handleUpdateProfessional} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Nome</Label>
-                <Input
-                  id="edit-name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-specialty">Especialidade</Label>
-                <Input
-                  id="edit-specialty"
-                  name="specialty"
-                  value={formData.specialty}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-phone">Telefone</Label>
-                <Input
-                  id="edit-phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
+            <ProfessionalFormFields
+              formData={formData}
+              onInputChange={handleInputChange}
+            />
 
             <div className="border-t pt-4">
               <AvailabilitySchedule

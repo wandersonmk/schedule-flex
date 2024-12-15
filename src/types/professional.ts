@@ -1,16 +1,4 @@
-export interface TimeSlot {
-  start: string;
-  end: string;
-}
-
-export interface DaySchedule {
-  enabled: boolean;
-  timeSlots: TimeSlot;
-}
-
-export interface WeeklySchedule {
-  [key: string]: DaySchedule;
-}
+import type { WeeklySchedule } from './availability';
 
 export interface Professional {
   id: string;
