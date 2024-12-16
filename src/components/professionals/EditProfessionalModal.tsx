@@ -87,7 +87,6 @@ export const EditProfessionalModal = ({
     try {
       setIsSubmitting(true);
 
-      // Update professional in database
       const { error: updateError } = await supabase
         .from('professionals')
         .update({
@@ -102,7 +101,6 @@ export const EditProfessionalModal = ({
         throw updateError;
       }
 
-      // Update professional availability
       const { error: availabilityError } = await supabase
         .from('professional_availability')
         .delete()
@@ -112,7 +110,6 @@ export const EditProfessionalModal = ({
         throw availabilityError;
       }
 
-      // Insert new availability records
       const availabilityRecords = Object.entries(formData.availability)
         .filter(([_, schedule]) => schedule.enabled)
         .map(([day, schedule]) => ({
@@ -156,14 +153,14 @@ export const EditProfessionalModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Editar Profissional</DialogTitle>
           <DialogDescription>
             Atualize as informações do profissional e sua disponibilidade semanal.
           </DialogDescription>
         </DialogHeader>
-        <ScrollArea className="h-[60vh] pr-4">
+        <ScrollArea className="flex-1 pr-4">
           <form onSubmit={handleUpdateProfessional} className="space-y-6">
             <ProfessionalFormFields
               formData={formData}

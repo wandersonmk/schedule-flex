@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pencil, Trash2, Clock } from "lucide-react";
+import { Pencil, Trash2, Clock, Phone, Mail } from "lucide-react";
 import { useState } from "react";
 import { DeleteAppointmentDialog } from "../admin/DeleteAppointmentDialog";
 import {
@@ -16,6 +16,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Card,
+  CardContent,
+} from "@/components/ui/card";
 
 interface TimeSlot {
   start: string;
@@ -44,6 +48,7 @@ interface ProfessionalsTableProps {
   professionals: Professional[];
   onEdit: (professional: Professional) => void;
   onDelete: (id: string) => void;
+  isMobile: boolean;
 }
 
 const getPeriodOfDay = (startTime: string, endTime: string): string => {
@@ -83,10 +88,66 @@ const formatAvailability = (availability: WeeklySchedule): string => {
   return availableDays || "Profissional indisponível";
 };
 
+const MobileCard = ({ professional, onEdit, onDelete }: { 
+  professional: Professional; 
+  onEdit: (professional: Professional) => void;
+  onDelete: (id: string) => void;
+}) => {
+  return (
+    <Card className="mb-4">
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-semibold">{professional.name}</h3>
+              <p className="text-sm text-gray-500">{professional.specialty}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => onEdit(professional)}
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="text-red-600 hover:text-red-700"
+                onClick={() => onDelete(professional.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="h-4 w-4 text-gray-500" />
+              {professional.email}
+            </div>
+            {professional.phone && (
+              <div className="flex items-center gap-2 text-sm">
+                <Phone className="h-4 w-4 text-gray-500" />
+                {professional.phone}
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-gray-500" />
+              {formatAvailability(professional.availability)}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const ProfessionalsTable = ({
   professionals,
   onEdit,
   onDelete,
+  isMobile,
 }: ProfessionalsTableProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<string | null>(null);
@@ -103,6 +164,26 @@ export const ProfessionalsTable = ({
       setSelectedProfessionalId(null);
     }
   };
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {professionals.map((professional) => (
+          <MobileCard
+            key={professional.id}
+            professional={professional}
+            onEdit={onEdit}
+            onDelete={handleDeleteClick}
+          />
+        ))}
+        <DeleteAppointmentDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirm={handleConfirmDelete}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-lg shadow">

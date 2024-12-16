@@ -5,6 +5,7 @@ import { AddProfessionalModal } from "@/components/professionals/AddProfessional
 import { ProfessionalsTable } from "@/components/professionals/ProfessionalsTable";
 import { EditProfessionalModal } from "@/components/professionals/EditProfessionalModal";
 import { useProfessionals } from "@/hooks/useProfessionals";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Professional {
   id: string;
@@ -32,6 +33,7 @@ interface WeeklySchedule {
 const AdminProfessionals = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
+  const isMobile = useIsMobile();
   
   const {
     professionals,
@@ -54,20 +56,25 @@ const AdminProfessionals = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AdminSidebar />
-        <main className="flex-1 p-4 md:p-8 bg-gray-50 w-full overflow-x-hidden">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
+        <main className="flex-1 p-3 md:p-8 bg-gray-50 w-full overflow-x-hidden">
+          <div className="space-y-4 md:space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">
                 Gerenciamento de Profissionais
               </h1>
               <AddProfessionalModal onAddProfessional={addProfessional} />
             </div>
 
-            <ProfessionalsTable
-              professionals={professionals}
-              onEdit={handleEditProfessional}
-              onDelete={deleteProfessional}
-            />
+            <div className="overflow-x-auto -mx-3 md:mx-0">
+              <div className="min-w-full inline-block align-middle">
+                <ProfessionalsTable
+                  professionals={professionals}
+                  onEdit={handleEditProfessional}
+                  onDelete={deleteProfessional}
+                  isMobile={isMobile}
+                />
+              </div>
+            </div>
           </div>
 
           <EditProfessionalModal
