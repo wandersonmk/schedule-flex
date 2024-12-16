@@ -155,19 +155,59 @@ export const addProfessionalToApi = async (newProfessional: NewProfessional) => 
 };
 
 export const updateProfessionalInApi = async (professional: Professional) => {
-  const { error } = await supabase
-    .from('professionals')
-    .update({
-      name: professional.name,
-      specialty: professional.specialty,
-      email: professional.email,
-      phone: professional.phone,
-    })
-    .eq('id', professional.id);
+  try {
+    // Primeiro, atualiza os dados básicos do profissional
+    const { error: updateError } = await supabase
+      .from('professionals')
+      .update({
+        name: professional.name,
+        specialty: professional.specialty,
+        email: professional.email,
+        phone: professional.phone,
+      })
+      .eq('id', professional.id);
 
-  if (error) {
-    console.error('Error updating professional:', error);
-    throw new Error('Failed to update professional');
+    if (updateError) {
+      console.error('Error updating professional:', updateError);
+      throw new Error('Failed to update professional');
+    }
+
+    // Remove todas as disponibilidades existentes
+    const { error: deleteError } = await supabase
+      .from('professional_availability')
+      .delete()
+      .eq('professional_id', professional.id);
+
+    if (deleteError) {
+      console.error('Error deleting availability:', deleteError);
+      throw new Error('Failed to update availability');
+    }
+
+    // Insere as novas disponibilidades
+    const availabilityRecords = Object.entries(professional.availability)
+      .filter(([_, schedule]) => schedule.enabled)
+      .map(([day, schedule]) => ({
+        professional_id: professional.id,
+        day_of_week: getDayNumber(day),
+        start_time: schedule.timeSlots.start,
+        end_time: schedule.timeSlots.end,
+      }));
+
+    if (availabilityRecords.length > 0) {
+      const { error: insertError } = await supabase
+        .from('professional_availability')
+        .insert(availabilityRecords);
+
+      if (insertError) {
+        console.error('Error inserting availability:', insertError);
+        throw new Error('Failed to update availability');
+      }
+    }
+
+    return professional;
+  } catch (error) {
+    console.error('Error in updateProfessionalInApi:', error);
+    throw error;
   }
 };
 
