@@ -7,23 +7,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AvailabilitySchedule } from "./AvailabilitySchedule";
-
-interface WeeklySchedule {
-  [key: string]: {
-    enabled: boolean;
-    timeSlots: {
-      start: string;
-      end: string;
-    };
-  };
-}
+import { ProfessionalFormFields } from "./ProfessionalFormFields";
+import type { WeeklySchedule } from "@/types/availability";
 
 interface AddProfessionalModalProps {
   onAddProfessional: (professional: {
@@ -45,6 +35,7 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
     availability: {} as WeeklySchedule,
   });
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,21 +52,34 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAddProfessional(formData);
-    setFormData({
-      name: "",
-      specialty: "",
-      email: "",
-      phone: "",
-      availability: {} as WeeklySchedule,
-    });
-    setIsOpen(false);
-    toast({
-      title: "Profissional adicionado",
-      description: "O profissional foi adicionado com sucesso.",
-    });
+    setIsSubmitting(true);
+    
+    try {
+      await onAddProfessional(formData);
+      setFormData({
+        name: "",
+        specialty: "",
+        email: "",
+        phone: "",
+        availability: {} as WeeklySchedule,
+      });
+      setIsOpen(false);
+      toast({
+        title: "Profissional adicionado",
+        description: "O profissional foi adicionado com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao adicionar profissional:', error);
+      toast({
+        title: "Erro ao adicionar",
+        description: "Ocorreu um erro ao adicionar o profissional.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -95,56 +99,20 @@ export const AddProfessionalModal = ({ onAddProfessional }: AddProfessionalModal
         </DialogHeader>
         <ScrollArea className="h-[60vh] pr-4">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="specialty">Especialidade</Label>
-                <Input
-                  id="specialty"
-                  name="specialty"
-                  value={formData.specialty}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </div>
+            <ProfessionalFormFields
+              formData={formData}
+              onInputChange={handleInputChange}
+            />
             
             <div className="border-t pt-4">
-              <AvailabilitySchedule onChange={handleAvailabilityChange} />
+              <AvailabilitySchedule 
+                onChange={handleAvailabilityChange}
+                initialSchedule={formData.availability}
+              />
             </div>
 
-            <Button type="submit" className="w-full">
-              Adicionar
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Adicionando..." : "Adicionar"}
             </Button>
           </form>
         </ScrollArea>
