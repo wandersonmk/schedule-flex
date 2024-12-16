@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import InputMask from "react-input-mask";
+import { createAppointmentInApi } from "@/api/appointments";
+import { useToast } from "@/hooks/use-toast";
 
 const professionals = [
   "Dr. Silva",
@@ -52,24 +54,47 @@ export const CreateAppointmentDialog = ({
   const [time, setTime] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [sendNotification, setSendNotification] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      professional,
-      client,
-      date,
-      time,
-      status: "Pendente",
-      whatsapp,
-      sendNotification,
-    });
-    setProfessional("");
-    setClient("");
-    setDate("");
-    setTime("");
-    setWhatsapp("");
-    setSendNotification(false);
+    setIsSubmitting(true);
+
+    try {
+      const appointmentData = {
+        professional,
+        client,
+        date,
+        time,
+        status: "Pendente",
+        whatsapp,
+      };
+
+      await createAppointmentInApi(appointmentData);
+      
+      onSave(appointmentData);
+      setProfessional("");
+      setClient("");
+      setDate("");
+      setTime("");
+      setWhatsapp("");
+      setSendNotification(false);
+      
+      toast({
+        title: "Agendamento criado",
+        description: "O agendamento foi criado com sucesso!",
+      });
+    } catch (error: any) {
+      console.error('Erro ao criar agendamento:', error);
+      toast({
+        title: "Erro ao criar agendamento",
+        description: error.message || "Ocorreu um erro ao criar o agendamento",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -162,7 +187,13 @@ export const CreateAppointmentDialog = ({
             </div>
           </div>
           <DialogFooter className="sm:justify-end">
-            <Button type="submit" className="w-full sm:w-auto">Salvar</Button>
+            <Button 
+              type="submit" 
+              className="w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Salvando..." : "Salvar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
