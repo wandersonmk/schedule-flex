@@ -143,7 +143,7 @@ export const EditProfessionalModal = ({
         description: "As informações foram atualizadas com sucesso.",
       });
     } catch (error: any) {
-      console.error('Error updating professional:', error);
+      console.error('Erro ao atualizar profissional:', error);
       toast({
         title: "Erro ao atualizar",
         description: "Ocorreu um erro ao atualizar o profissional.",
