@@ -1,93 +1,112 @@
 import { supabase } from '@/integrations/supabase/client';
 
-interface CreateAppointmentData {
+export const createAppointmentInApi = async (appointmentData: {
   professional: string;
   client: string;
   date: string;
   time: string;
   status: string;
   whatsapp?: string;
-}
+}) => {
+  try {
+    // Get current user and organization
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Usuário não autenticado');
+    }
 
-export const createAppointmentInApi = async (appointmentData: CreateAppointmentData) => {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    throw new Error('Usuário não autenticado');
-  }
+    const { data: orgMember, error: orgError } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .single();
 
-  // Buscar organization_id do usuário
-  const { data: orgMember, error: orgError } = await supabase
-    .from('organization_members')
-    .select('organization_id')
-    .eq('user_id', user.id)
-    .single();
+    if (orgError || !orgMember) {
+      throw new Error('Organização não encontrada');
+    }
 
-  if (orgError || !orgMember) {
-    throw new Error('Falha ao buscar organização');
-  }
+    // Verify if professional exists and belongs to the organization
+    const { data: professional, error: profError } = await supabase
+      .from('professionals')
+      .select('id')
+      .eq('id', appointmentData.professional)
+      .eq('organization_id', orgMember.organization_id)
+      .single();
 
-  // Buscar professional_id
-  const { data: professional, error: profError } = await supabase
-    .from('professionals')
-    .select('id')
-    .eq('name', appointmentData.professional)
-    .eq('organization_id', orgMember.organization_id)
-    .single();
+    if (profError || !professional) {
+      console.error('Professional error:', profError);
+      throw new Error('Profissional não encontrado');
+    }
 
-  if (profError || !professional) {
-    throw new Error('Profissional não encontrado');
-  }
-
-  // Buscar ou criar cliente
-  let clientId;
-  const { data: existingClient, error: clientError } = await supabase
-    .from('clients')
-    .select('id')
-    .eq('name', appointmentData.client)
-    .eq('organization_id', orgMember.organization_id)
-    .single();
-
-  if (clientError) {
-    // Cliente não existe, vamos criar
-    const { data: newClient, error: createClientError } = await supabase
+    // Create or find client
+    let clientId;
+    const { data: existingClient, error: clientSearchError } = await supabase
       .from('clients')
+      .select('id')
+      .eq('organization_id', orgMember.organization_id)
+      .eq('name', appointmentData.client)
+      .single();
+
+    if (clientSearchError && clientSearchError.code !== 'PGRST116') {
+      throw new Error('Erro ao buscar cliente');
+    }
+
+    if (existingClient) {
+      clientId = existingClient.id;
+    } else {
+      const { data: newClient, error: createClientError } = await supabase
+        .from('clients')
+        .insert({
+          organization_id: orgMember.organization_id,
+          name: appointmentData.client,
+          phone: appointmentData.whatsapp,
+        })
+        .select('id')
+        .single();
+
+      if (createClientError || !newClient) {
+        throw new Error('Erro ao criar cliente');
+      }
+
+      clientId = newClient.id;
+    }
+
+    // Create appointment
+    const startTime = new Date(`${appointmentData.date}T${appointmentData.time}`);
+    const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Add 1 hour
+
+    const { data: appointment, error: appointmentError } = await supabase
+      .from('appointments')
       .insert({
-        name: appointmentData.client,
-        phone: appointmentData.whatsapp,
         organization_id: orgMember.organization_id,
+        professional_id: professional.id,
+        client_id: clientId,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: appointmentData.status,
       })
       .select()
       .single();
 
-    if (createClientError || !newClient) {
-      throw new Error('Falha ao criar cliente');
+    if (appointmentError || !appointment) {
+      throw new Error('Erro ao criar agendamento');
     }
-    clientId = newClient.id;
-  } else {
-    clientId = existingClient.id;
+
+    return appointment;
+  } catch (error: any) {
+    console.error('Error in createAppointmentInApi:', error);
+    throw error;
   }
+};
 
-  // Criar o agendamento
-  const startTime = new Date(`${appointmentData.date}T${appointmentData.time}`);
-  const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Adiciona 1 hora
+export const fetchAppointmentsFromApi = async () => {
+  // Fetch appointments logic here
+};
 
-  const { data: appointment, error: appointmentError } = await supabase
-    .from('appointments')
-    .insert({
-      organization_id: orgMember.organization_id,
-      professional_id: professional.id,
-      client_id: clientId,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      status: appointmentData.status,
-    })
-    .select()
-    .single();
+export const updateAppointmentInApi = async (appointmentId: string, updatedData: any) => {
+  // Update appointment logic here
+};
 
-  if (appointmentError) {
-    throw new Error('Falha ao criar agendamento');
-  }
-
-  return appointment;
+export const deleteAppointmentFromApi = async (appointmentId: string) => {
+  // Delete appointment logic here
 };
