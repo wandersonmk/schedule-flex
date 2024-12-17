@@ -9,6 +9,8 @@ export const createAppointmentInApi = async (appointmentData: {
   whatsapp?: string;
 }) => {
   try {
+    console.log('Creating appointment with data:', appointmentData);
+    
     // Get current user and organization
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -22,6 +24,7 @@ export const createAppointmentInApi = async (appointmentData: {
       .single();
 
     if (orgError || !orgMember) {
+      console.error('Organization error:', orgError);
       throw new Error('Organização não encontrada');
     }
 
@@ -45,9 +48,10 @@ export const createAppointmentInApi = async (appointmentData: {
       .select('id')
       .eq('organization_id', orgMember.organization_id)
       .eq('name', appointmentData.client)
-      .single();
+      .maybeSingle();
 
-    if (clientSearchError && clientSearchError.code !== 'PGRST116') {
+    if (clientSearchError) {
+      console.error('Client search error:', clientSearchError);
       throw new Error('Erro ao buscar cliente');
     }
 
@@ -65,6 +69,7 @@ export const createAppointmentInApi = async (appointmentData: {
         .single();
 
       if (createClientError || !newClient) {
+        console.error('Create client error:', createClientError);
         throw new Error('Erro ao criar cliente');
       }
 
@@ -88,10 +93,12 @@ export const createAppointmentInApi = async (appointmentData: {
       .select()
       .single();
 
-    if (appointmentError || !appointment) {
+    if (appointmentError) {
+      console.error('Appointment creation error:', appointmentError);
       throw new Error('Erro ao criar agendamento');
     }
 
+    console.log('Appointment created successfully:', appointment);
     return appointment;
   } catch (error: any) {
     console.error('Error in createAppointmentInApi:', error);
