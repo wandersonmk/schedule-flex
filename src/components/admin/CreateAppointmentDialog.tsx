@@ -20,14 +20,7 @@ import { useState } from "react";
 import InputMask from "react-input-mask";
 import { createAppointmentInApi } from "@/api/appointments";
 import { useToast } from "@/hooks/use-toast";
-
-const professionals = [
-  "Dr. Silva",
-  "Dra. Costa",
-  "Dr. Santos",
-  "Dra. Oliveira",
-  "Dr. Lima",
-];
+import { useAppointmentProfessionals } from "@/hooks/useAppointmentProfessionals";
 
 interface CreateAppointmentDialogProps {
   open: boolean;
@@ -56,6 +49,7 @@ export const CreateAppointmentDialog = ({
   const [sendNotification, setSendNotification] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { professionals, loading } = useAppointmentProfessionals();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,12 +107,12 @@ export const CreateAppointmentDialog = ({
                 required
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione um profissional" />
+                  <SelectValue placeholder={loading ? "Carregando..." : "Selecione um profissional"} />
                 </SelectTrigger>
                 <SelectContent>
                   {professionals.map((prof) => (
-                    <SelectItem key={prof} value={prof}>
-                      {prof}
+                    <SelectItem key={prof.id} value={prof.id}>
+                      {prof.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
