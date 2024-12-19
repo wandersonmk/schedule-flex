@@ -74,4 +74,18 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Ajuste para texto em fundos brancos no modo escuro */
+  .dark [class*="bg-white"] {
+    --tw-text-opacity: 1;
+    color: rgb(33 33 33 / var(--tw-text-opacity));
+  }
+
+  /* Ajuste para texto em fundos escuros no modo escuro */
+  .dark [class*="bg-gray-900"],
+  .dark [class*="bg-black"],
+  .dark [class*="bg-slate-900"] {
+    --tw-text-opacity: 1;
+    color: rgb(237 237 237 / var(--tw-text-opacity));
+  }
 }
