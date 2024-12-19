@@ -46,8 +46,8 @@ export const AdminSidebar = () => {
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center gap-3 px-6 py-2 text-foreground hover:bg-accent",
-              isActive(item.path) && "bg-accent text-primary font-medium"
+              "flex items-center gap-3 px-6 py-2 text-foreground hover:bg-accent/50 transition-colors",
+              isActive(item.path) && "bg-accent/50 text-primary font-medium"
             )}
           >
             <item.icon className="h-5 w-5" />
