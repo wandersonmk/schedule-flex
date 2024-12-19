@@ -1,22 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-const data = [
-  { month: "Jan", revenue: 4000 },
-  { month: "Fev", revenue: 3000 },
-  { month: "Mar", revenue: 2000 },
-  { month: "Abr", revenue: 2780 },
-  { month: "Mai", revenue: 1890 },
-  { month: "Jun", revenue: 2390 },
-  { month: "Jul", revenue: 3490 },
-  { month: "Ago", revenue: 3200 },
-  { month: "Set", revenue: 2800 },
-  { month: "Out", revenue: 4300 },
-  { month: "Nov", revenue: 4100 },
-  { month: "Dez", revenue: 4500 },
-];
+interface RevenueChartProps {
+  data: Array<{
+    month: string;
+    revenue: number;
+  }>;
+}
 
-export const RevenueChart = () => {
+export const RevenueChart = ({ data }: RevenueChartProps) => {
   return (
     <Card className="col-span-4">
       <CardHeader>
