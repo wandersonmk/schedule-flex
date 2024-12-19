@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
+import { ThemeToggle } from "./theme/ThemeToggle";
 
 export const AdminSidebar = () => {
   const location = useLocation();
@@ -38,15 +39,15 @@ export const AdminSidebar = () => {
   ];
 
   return (
-    <div className="h-screen w-64 bg-white border-r flex flex-col">
+    <div className="h-screen w-64 bg-background border-r flex flex-col">
       <div className="flex-1 py-6 flex flex-col gap-2">
         {menuItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
             className={cn(
-              "flex items-center gap-3 px-6 py-2 text-gray-600 hover:bg-gray-50",
-              isActive(item.path) && "bg-gray-50 text-primary font-medium"
+              "flex items-center gap-3 px-6 py-2 text-foreground hover:bg-accent",
+              isActive(item.path) && "bg-accent text-primary font-medium"
             )}
           >
             <item.icon className="h-5 w-5" />
@@ -54,10 +55,14 @@ export const AdminSidebar = () => {
           </Link>
         ))}
       </div>
-      <div className="p-6 border-t">
+      <div className="p-6 border-t flex flex-col gap-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">Tema</span>
+          <ThemeToggle />
+        </div>
         <Button
           variant="ghost"
-          className="w-full justify-start gap-3 text-gray-600"
+          className="w-full justify-start gap-3 text-foreground"
           onClick={logout}
         >
           <LogOut className="h-5 w-5" />

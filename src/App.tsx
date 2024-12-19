@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminCalendar from "./pages/AdminCalendar";
@@ -31,7 +32,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check for an existing session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
@@ -44,7 +44,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(!!session);
         setIsLoading(false);
 
-        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
           setIsAuthenticated(!!session);
           setIsLoading(false);
@@ -81,94 +80,96 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <Admin />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/calendar"
-              element={
-                <ProtectedRoute>
-                  <AdminCalendar />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/filters"
-              element={
-                <ProtectedRoute>
-                  <AdminFilters />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/professionals"
-              element={
-                <ProtectedRoute>
-                  <AdminProfessionals />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/clients"
-              element={
-                <ProtectedRoute>
-                  <AdminClients />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/notifications"
-              element={
-                <ProtectedRoute>
-                  <AdminNotifications />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/reports"
-              element={
-                <ProtectedRoute>
-                  <AdminReports />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedRoute>
-                  <AdminSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/financial"
-              element={
-                <ProtectedRoute>
-                  <AdminFinancial />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/export"
-              element={
-                <ProtectedRoute>
-                  <AdminExport />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ThemeProvider defaultTheme="light" storageKey="app-theme">
+        <TooltipProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <Admin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/calendar"
+                element={
+                  <ProtectedRoute>
+                    <AdminCalendar />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/filters"
+                element={
+                  <ProtectedRoute>
+                    <AdminFilters />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/professionals"
+                element={
+                  <ProtectedRoute>
+                    <AdminProfessionals />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/clients"
+                element={
+                  <ProtectedRoute>
+                    <AdminClients />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/notifications"
+                element={
+                  <ProtectedRoute>
+                    <AdminNotifications />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <ProtectedRoute>
+                    <AdminReports />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute>
+                    <AdminSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/financial"
+                element={
+                  <ProtectedRoute>
+                    <AdminFinancial />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/export"
+                element={
+                  <ProtectedRoute>
+                    <AdminExport />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
