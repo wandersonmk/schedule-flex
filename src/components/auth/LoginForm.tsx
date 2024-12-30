@@ -19,11 +19,18 @@ export const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const { user } = await loginWithEmail(email, password);
+      const { data, error } = await loginWithEmail(email, password);
 
-      if (!user) {
+      if (error) {
+        throw error;
+      }
+
+      if (!data.user) {
         throw new Error("Usuário não encontrado");
       }
+
+      // Aguardar um momento para garantir que os triggers do Supabase foram executados
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       toast({
         title: "Login realizado com sucesso!",
@@ -33,6 +40,8 @@ export const LoginForm = () => {
       navigate("/admin");
     } catch (error: any) {
       console.error("Erro no login:", error);
+      setIsLoading(false); // Importante resetar o loading em caso de erro
+      
       toast({
         title: "Erro ao fazer login",
         description: error.message === "Invalid login credentials"
@@ -40,8 +49,6 @@ export const LoginForm = () => {
           : "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

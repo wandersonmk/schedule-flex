@@ -54,11 +54,5 @@ export const loginWithEmail = async (email: string, password: string) => {
     password,
   });
 
-  if (error) {
-    console.error('Erro no login:', error);
-    throw error;
-  }
-
-  console.log('Login bem sucedido:', data);
-  return data;
+  return { data, error };
 };
