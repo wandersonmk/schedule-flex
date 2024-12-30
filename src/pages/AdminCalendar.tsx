@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FilterSection } from "@/components/admin/FilterSection";
 import { AppointmentsTable } from "@/components/admin/AppointmentsTable";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,33 +9,49 @@ import { Plus } from "lucide-react";
 import { CreateAppointmentDialog } from "@/components/admin/CreateAppointmentDialog";
 import { EditAppointmentDialog } from "@/components/admin/EditAppointmentDialog";
 import { DeleteAppointmentDialog } from "@/components/admin/DeleteAppointmentDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
 
-const mockAppointments = [
-  {
-    id: "APT001",
-    professional: "Dr. Silva",
-    client: "João Santos",
-    date: "2024-03-20",
-    time: "09:00",
-    status: "Confirmado",
-  },
-  {
-    id: "APT002",
-    professional: "Dra. Costa",
-    client: "Maria Oliveira",
-    date: "2024-03-20",
-    time: "10:00",
-    status: "Pendente",
-  },
-  {
-    id: "APT003",
-    professional: "Dr. Santos",
-    client: "Pedro Lima",
-    date: "2024-03-20",
-    time: "11:00",
-    status: "Cancelado",
-  },
-];
+interface Appointment {
+  id: string;
+  professional: {
+    name: string;
+  };
+  client: {
+    name: string;
+    phone: string | null;
+  };
+  start_time: string;
+  status: string;
+}
+
+const fetchAppointments = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Usuário não autenticado");
+
+  const { data: orgMember, error: orgError } = await supabase
+    .from('organization_members')
+    .select('organization_id')
+    .eq('user_id', user.id)
+    .single();
+
+  if (orgError) throw orgError;
+
+  const { data, error } = await supabase
+    .from('appointments')
+    .select(`
+      id,
+      start_time,
+      status,
+      professional:professionals(name),
+      client:clients(name, phone)
+    `)
+    .eq('organization_id', orgMember.organization_id);
+
+  if (error) throw error;
+  return data;
+};
 
 const AdminCalendar = () => {
   const { toast } = useToast();
@@ -46,8 +62,33 @@ const AdminCalendar = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [appointments, setAppointments] = useState(mockAppointments);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
+
+  const { data: appointments = [], refetch } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: fetchAppointments,
+  });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        () => {
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   const handleResetFilters = () => {
     setStartDate(undefined);
@@ -56,7 +97,7 @@ const AdminCalendar = () => {
     setProfessionalFilter("");
   };
 
-  const handleSaveAppointment = (appointment: {
+  const handleSaveAppointment = async (appointment: {
     professional: string;
     client: string;
     date: string;
@@ -65,53 +106,127 @@ const AdminCalendar = () => {
     whatsapp?: string;
     sendNotification?: boolean;
   }) => {
-    const newAppointment = {
-      id: `APT${(appointments.length + 1).toString().padStart(3, '0')}`,
-      ...appointment
-    };
-    
-    setAppointments([...appointments, newAppointment]);
-    setIsCreateDialogOpen(false);
-    
-    toast({
-      title: "Agendamento criado",
-      description: `Agendamento para ${appointment.client} criado com sucesso.`,
-    });
-  };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
 
-  const handleEditAppointment = (appointment: any) => {
-    const updatedAppointments = appointments.map((app) =>
-      app.id === appointment.id ? appointment : app
-    );
-    setAppointments(updatedAppointments);
-    setIsEditDialogOpen(false);
-    
-    toast({
-      title: "Agendamento atualizado",
-      description: `Agendamento para ${appointment.client} atualizado com sucesso.`,
-    });
-  };
+      const { data: orgMember } = await supabase
+        .from('organization_members')
+        .select('organization_id')
+        .eq('user_id', user.id)
+        .single();
 
-  const handleDeleteAppointment = () => {
-    if (selectedAppointment) {
-      const updatedAppointments = appointments.filter(
-        (app) => app.id !== selectedAppointment.id
-      );
-      setAppointments(updatedAppointments);
-      setIsDeleteDialogOpen(false);
-      setSelectedAppointment(null);
-      
+      if (!orgMember) throw new Error("Organização não encontrada");
+
+      // Criar ou encontrar cliente
+      let clientId;
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('organization_id', orgMember.organization_id)
+        .eq('name', appointment.client)
+        .maybeSingle();
+
+      if (existingClient) {
+        clientId = existingClient.id;
+      } else {
+        const { data: newClient } = await supabase
+          .from('clients')
+          .insert({
+            organization_id: orgMember.organization_id,
+            name: appointment.client,
+            phone: appointment.whatsapp,
+          })
+          .select('id')
+          .single();
+
+        if (!newClient) throw new Error("Erro ao criar cliente");
+        clientId = newClient.id;
+      }
+
+      const startTime = new Date(`${appointment.date}T${appointment.time}`);
+      const endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Adiciona 1 hora
+
+      await supabase
+        .from('appointments')
+        .insert({
+          organization_id: orgMember.organization_id,
+          professional_id: appointment.professional,
+          client_id: clientId,
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          status: appointment.status,
+        });
+
+      setIsCreateDialogOpen(false);
       toast({
-        title: "Agendamento excluído",
-        description: "O agendamento foi excluído com sucesso.",
+        title: "Agendamento criado",
+        description: `Agendamento para ${appointment.client} criado com sucesso.`,
+      });
+    } catch (error: any) {
+      console.error('Erro ao criar agendamento:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao criar agendamento",
+        variant: "destructive",
       });
     }
   };
 
-  const filteredAppointments = appointments.filter((appointment) => {
-    const appointmentDate = new Date(appointment.date);
+  const handleEditAppointment = async (appointment: any) => {
+    try {
+      await supabase
+        .from('appointments')
+        .update({
+          status: appointment.status,
+          start_time: new Date(`${appointment.date}T${appointment.time}`).toISOString(),
+        })
+        .eq('id', appointment.id);
+
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Agendamento atualizado",
+        description: `Agendamento atualizado com sucesso.`,
+      });
+    } catch (error: any) {
+      console.error('Erro ao atualizar agendamento:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar agendamento",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAppointment = async () => {
+    if (selectedAppointment) {
+      try {
+        await supabase
+          .from('appointments')
+          .delete()
+          .eq('id', selectedAppointment.id);
+
+        setIsDeleteDialogOpen(false);
+        setSelectedAppointment(null);
+        toast({
+          title: "Agendamento excluído",
+          description: "O agendamento foi excluído com sucesso.",
+        });
+      } catch (error: any) {
+        console.error('Erro ao excluir agendamento:', error);
+        toast({
+          title: "Erro",
+          description: error.message || "Erro ao excluir agendamento",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const filteredAppointments = appointments.filter((appointment: Appointment) => {
+    const appointmentDate = new Date(appointment.start_time);
     const matchesId = appointment.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesProfessional = appointment.professional
+    const matchesProfessional = appointment.professional.name
       .toLowerCase()
       .includes(professionalFilter.toLowerCase());
     const matchesDateRange =
@@ -124,6 +239,16 @@ const AdminCalendar = () => {
       matchesDateRange
     );
   });
+
+  const formattedAppointments = filteredAppointments.map((appointment: Appointment) => ({
+    id: appointment.id,
+    professional: appointment.professional.name,
+    client: appointment.client.name,
+    date: format(new Date(appointment.start_time), "yyyy-MM-dd"),
+    time: format(new Date(appointment.start_time), "HH:mm"),
+    status: appointment.status,
+    whatsapp: appointment.client.phone,
+  }));
 
   return (
     <SidebarProvider>
@@ -155,16 +280,20 @@ const AdminCalendar = () => {
             />
 
             <AppointmentsTable 
-              appointments={filteredAppointments}
+              appointments={formattedAppointments}
               onEdit={(id) => {
-                const appointment = appointments.find(app => app.id === id);
+                const appointment = appointments.find((app: any) => app.id === id);
                 if (appointment) {
-                  setSelectedAppointment(appointment);
+                  setSelectedAppointment({
+                    ...appointment,
+                    date: format(new Date(appointment.start_time), "yyyy-MM-dd"),
+                    time: format(new Date(appointment.start_time), "HH:mm"),
+                  });
                   setIsEditDialogOpen(true);
                 }
               }}
               onDelete={(id) => {
-                const appointment = appointments.find(app => app.id === id);
+                const appointment = appointments.find((app: any) => app.id === id);
                 if (appointment) {
                   setSelectedAppointment(appointment);
                   setIsDeleteDialogOpen(true);
