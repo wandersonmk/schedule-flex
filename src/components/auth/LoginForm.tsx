@@ -16,22 +16,31 @@ export const LoginForm = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
+    console.log('Iniciando tentativa de login');
     
     try {
       const { data, error } = await loginWithEmail(email, password);
 
       if (error) {
+        console.error('Erro retornado pelo loginWithEmail:', error);
         throw error;
       }
 
-      if (!data.user) {
+      if (!data?.user) {
+        console.error('Nenhum usuário retornado após login');
         throw new Error("Usuário não encontrado");
       }
 
+      console.log('Login bem sucedido, aguardando triggers');
+      
       // Aguardar um momento para garantir que os triggers do Supabase foram executados
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
+      console.log('Redirecionando para /admin');
+      
       toast({
         title: "Login realizado com sucesso!",
         description: "Você será redirecionado para o painel.",
@@ -39,8 +48,7 @@ export const LoginForm = () => {
       
       navigate("/admin");
     } catch (error: any) {
-      console.error("Erro no login:", error);
-      setIsLoading(false); // Importante resetar o loading em caso de erro
+      console.error("Erro detalhado no login:", error);
       
       toast({
         title: "Erro ao fazer login",
@@ -49,6 +57,8 @@ export const LoginForm = () => {
           : "Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

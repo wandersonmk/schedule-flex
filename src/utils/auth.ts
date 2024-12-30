@@ -47,12 +47,23 @@ export const checkOrganizationMembership = async (userId: string) => {
 };
 
 export const loginWithEmail = async (email: string, password: string) => {
-  console.log('Tentando login com email:', email);
+  console.log('Iniciando processo de login para:', email);
   
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  return { data, error };
+    if (error) {
+      console.error('Erro durante o login:', error);
+      return { data: null, error };
+    }
+
+    console.log('Login bem sucedido:', data.user?.id);
+    return { data, error: null };
+  } catch (error) {
+    console.error('Erro inesperado durante o login:', error);
+    return { data: null, error };
+  }
 };
