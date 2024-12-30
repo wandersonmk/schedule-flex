@@ -39,7 +39,10 @@ export const useAppointmentProfessionals = () => {
         .select('id, name')
         .eq('organization_id', orgMember.organization_id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar profissionais:', error);
+        throw error;
+      }
 
       setProfessionals(data || []);
     } catch (error: any) {
@@ -58,5 +61,5 @@ export const useAppointmentProfessionals = () => {
     fetchProfessionals();
   }, []);
 
-  return { professionals, loading };
+  return { professionals, loading, refetch: fetchProfessionals };
 };
