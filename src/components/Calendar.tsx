@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Plus, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { format, addDays, startOfWeek, parseISO, isWithinInterval } from "date-fns";
@@ -56,81 +55,93 @@ export const Calendar = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold">Agenda</h1>
-          <div className="flex items-center gap-2">
-            {!loadingProfessionals ? (
-              <Select
-                value={selectedProfessional}
-                onValueChange={setSelectedProfessional}
+    <div className="flex h-screen bg-background">
+      {/* Sidebar */}
+      <div className="w-64 bg-purple-900 text-white p-4">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">
+            {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
+          </h2>
+          {/* Mini calendar could be added here */}
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-4">Profissionais</h3>
+          <div className="space-y-4">
+            {professionals.map((prof) => (
+              <div
+                key={prof.id}
+                className={cn(
+                  "flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors",
+                  selectedProfessional === prof.id
+                    ? "bg-purple-800"
+                    : "hover:bg-purple-800/50"
+                )}
+                onClick={() => setSelectedProfessional(prof.id)}
               >
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Selecione um profissional" />
-                </SelectTrigger>
-                <SelectContent>
-                  {professionals.map((professional) => (
-                    <SelectItem key={professional.id} value={professional.id}>
-                      {professional.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Skeleton className="h-10 w-[200px]" />
-            )}
+                <Avatar className="h-10 w-10">
+                  {/* Add professional image if available */}
+                </Avatar>
+                <div>
+                  <p className="font-medium">{prof.name}</p>
+                  <p className="text-sm text-purple-200">{prof.specialty}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="default" className="bg-purple-700 hover:bg-purple-800">
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Agendamento
-          </Button>
-          <Button variant="outline" size="icon">
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
-      {/* Calendar Navigation */}
-      <div className="flex justify-between items-center p-4">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="outline" size="icon" onClick={handleNextWeek}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium">
-            {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
-          </span>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h1 className="text-xl font-semibold">Clínica Saúde</h1>
+          <div className="flex items-center gap-2">
+            <Button variant="default" className="bg-purple-700 hover:bg-purple-800">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo
+            </Button>
+            <Button variant="outline" size="icon">
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
 
-      {/* Calendar Grid */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Time slots */}
-        <div className="w-20 border-r">
-          <div className="h-12 border-b"></div> {/* Header spacer */}
-          {timeSlots.map((time) => (
-            <div key={time} className="h-20 border-b px-4 py-2 text-sm text-muted-foreground">
-              {time}
+        {/* Calendar Grid */}
+        <div className="flex-1 overflow-auto">
+          {/* Week Navigation */}
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={handlePreviousWeek}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={handleNextWeek}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Days */}
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex min-w-full">
+          {/* Week View */}
+          <div className="grid grid-cols-8 gap-px bg-gray-200">
+            {/* Time column */}
+            <div className="bg-white">
+              <div className="h-12"></div>
+              {timeSlots.map((time) => (
+                <div key={time} className="h-20 p-2 text-sm text-gray-500">
+                  {time}
+                </div>
+              ))}
+            </div>
+
+            {/* Days columns */}
             {weekDays.map((date) => (
-              <div key={date.toISOString()} className="flex-1 min-w-[200px]">
-                <div className="h-12 border-b px-4 py-2">
+              <div key={date.toISOString()} className="bg-white">
+                <div className="h-12 p-2 border-b">
                   <div className="text-sm font-medium">
                     {format(date, "d", { locale: ptBR })}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-gray-500">
                     {format(date, "EEEE", { locale: ptBR })}
                   </div>
                 </div>
@@ -139,7 +150,7 @@ export const Calendar = () => {
                   return (
                     <div
                       key={`${date.toISOString()}-${time}`}
-                      className="h-20 border-b border-r px-2 py-1"
+                      className="h-20 border-b p-1"
                     >
                       {loadingAppointments ? (
                         <Skeleton className="h-16 w-full" />
@@ -147,16 +158,12 @@ export const Calendar = () => {
                         appointments.map((apt) => (
                           <div
                             key={apt.id}
-                            className={cn(
-                              "p-2 rounded-lg bg-purple-900 text-white",
-                              "text-xs mb-1 cursor-pointer transition-all",
-                              "hover:bg-purple-800"
-                            )}
+                            className="p-2 rounded-lg bg-purple-900 text-white text-xs mb-1 cursor-pointer hover:bg-purple-800"
                           >
-                            <div className="font-medium">
+                            <div className="font-medium truncate">
                               {apt.client?.name}
                             </div>
-                            <div className="text-purple-200">
+                            <div className="text-purple-200 text-xs">
                               {format(parseISO(apt.start_time), "HH:mm")} - 
                               {format(parseISO(apt.end_time), "HH:mm")}
                             </div>
