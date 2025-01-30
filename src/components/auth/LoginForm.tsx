@@ -37,15 +37,21 @@ export const LoginForm = () => {
 
       console.log('Login bem sucedido, verificando organização');
       
+      // Verificar se o usuário tem uma organização associada
       const { data: orgMember, error: orgError } = await supabase
         .from('organization_members')
         .select('organization_id, role')
         .eq('user_id', data.user.id)
         .single();
 
-      if (orgError || !orgMember) {
+      if (orgError) {
         console.error('Erro ao verificar organização:', orgError);
         throw new Error("Erro ao verificar organização");
+      }
+
+      if (!orgMember) {
+        console.error('Usuário não possui organização');
+        throw new Error("Usuário não possui organização associada");
       }
 
       console.log('Organização verificada, redirecionando');
@@ -55,7 +61,7 @@ export const LoginForm = () => {
         description: "Você será redirecionado para o painel.",
       });
       
-      // Use replace: true to prevent back navigation to login
+      // Use replace: true para evitar navegação de volta ao login
       navigate("/admin", { replace: true });
     } catch (error: any) {
       console.error("Erro detalhado no login:", error);
