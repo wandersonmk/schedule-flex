@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { loginWithEmail } from "@/utils/auth";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +55,8 @@ export const LoginForm = () => {
         description: "Você será redirecionado para o painel.",
       });
       
-      navigate("/admin");
+      // Use replace: true to prevent back navigation to login
+      navigate("/admin", { replace: true });
     } catch (error: any) {
       console.error("Erro detalhado no login:", error);
       
