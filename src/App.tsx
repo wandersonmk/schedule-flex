@@ -34,13 +34,45 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Primeiro, tenta obter a sessão atual
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Erro ao obter sessão:', sessionError);
+          if (mounted) {
+            setIsAuthenticated(false);
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        // Se não há sessão, tenta atualizar
+        if (!session) {
+          const { data: { session: refreshedSession }, error: refreshError } = 
+            await supabase.auth.refreshSession();
+          
+          if (refreshError) {
+            console.error('Erro ao atualizar sessão:', refreshError);
+            if (mounted) {
+              setIsAuthenticated(false);
+              setIsLoading(false);
+            }
+            return;
+          }
+
+          if (mounted) {
+            setIsAuthenticated(!!refreshedSession);
+            setIsLoading(false);
+          }
+          return;
+        }
+
         if (mounted) {
           setIsAuthenticated(!!session);
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Erro ao verificar autenticação:', error);
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
@@ -48,11 +80,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Verifica autenticação inicial
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Configura listener para mudanças na autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
       if (mounted) {
-        setIsAuthenticated(!!session);
+        if (event === 'SIGNED_OUT') {
+          setIsAuthenticated(false);
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setIsAuthenticated(true);
+        }
         setIsLoading(false);
       }
     });
