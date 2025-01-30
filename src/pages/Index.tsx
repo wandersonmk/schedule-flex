@@ -19,30 +19,12 @@ const Index = () => {
           .single();
 
         if (orgMember) {
-          navigate("/admin");
+          navigate("/admin", { replace: true });
         }
       }
     };
 
     checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        const { data: orgMember } = await supabase
-          .from('organization_members')
-          .select('organization_id, role')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (orgMember) {
-          navigate("/admin");
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [navigate]);
 
   return (
