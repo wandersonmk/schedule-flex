@@ -10,7 +10,12 @@ export const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Bem-vindo ao seu painel de controle
+          </p>
+        </div>
         <Button
           onClick={() => navigate("/admin/calendar")}
           className="bg-primary hover:bg-primary/90 text-white transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2"
@@ -21,7 +26,10 @@ export const AdminDashboard = () => {
       </div>
 
       <DashboardMetrics />
-      <AppointmentsChart />
+      
+      <div className="grid gap-4 grid-cols-1">
+        <AppointmentsChart />
+      </div>
     </div>
   );
 };
