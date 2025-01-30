@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 const data = [
   { date: "01/03", appointments: 4, revenue: 400 },
@@ -12,6 +13,9 @@ const data = [
 ];
 
 export const AppointmentsChart = () => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
     <Card className="col-span-4">
       <CardHeader>
@@ -23,13 +27,13 @@ export const AppointmentsChart = () => {
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <XAxis 
                 dataKey="date" 
-                stroke="#888888"
+                stroke={isDark ? "#666666" : "#888888"}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="#888888"
+                stroke={isDark ? "#666666" : "#888888"}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
@@ -37,16 +41,17 @@ export const AppointmentsChart = () => {
               />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
+                  backgroundColor: isDark ? '#1f2937' : 'white',
+                  border: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
                   borderRadius: '6px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  color: isDark ? '#e5e7eb' : 'inherit'
                 }}
               />
               <Line
                 type="monotone"
                 dataKey="appointments"
-                stroke="#2563eb"
+                stroke={isDark ? "#60a5fa" : "#2563eb"}
                 strokeWidth={2}
                 dot={{ strokeWidth: 2 }}
                 name="Agendamentos"
@@ -54,7 +59,7 @@ export const AppointmentsChart = () => {
               <Line
                 type="monotone"
                 dataKey="revenue"
-                stroke="#10b981"
+                stroke={isDark ? "#34d399" : "#10b981"}
                 strokeWidth={2}
                 dot={{ strokeWidth: 2 }}
                 name="Receita"

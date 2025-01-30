@@ -121,7 +121,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="app-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="app-theme">
         <TooltipProvider>
           <BrowserRouter>
             <Routes>

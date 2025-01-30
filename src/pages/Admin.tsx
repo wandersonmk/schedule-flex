@@ -7,7 +7,7 @@ const Admin = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AdminSidebar />
-        <main className="flex-1 p-4 md:p-8 bg-gray-50 w-full overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-8 bg-background w-full overflow-x-hidden">
           <AdminDashboard />
         </main>
       </div>
